@@ -1,3 +1,6 @@
+plugins {
+    id "org.inferred.processors" version "1.1"
+}
 apply from: "${rootDir}/shared.gradle"
 
 dependencies {
@@ -5,4 +8,5 @@ dependencies {
     compile "com.google.guava:guava:18.0"
     compile "javax.ws.rs:javax.ws.rs-api:2.0.1"
     compile "commons-io:commons-io:2.4"
+    processor "org.immutables:value:2.0.17"
 }
