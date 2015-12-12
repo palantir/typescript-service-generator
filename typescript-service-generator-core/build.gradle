@@ -8,5 +8,7 @@ dependencies {
     compile "com.google.guava:guava:18.0"
     compile "javax.ws.rs:javax.ws.rs-api:2.0.1"
     compile "commons-io:commons-io:2.4"
+    compile "javax.annotation:jsr250-api:1.0"
+
     processor "org.immutables:value:2.0.17"
 }

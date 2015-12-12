@@ -43,9 +43,9 @@ public class ServiceEmitter {
     }
 
     public void emitTypescriptTypes(OutputWriter writer, GenerationSettings settings) {
-        model.getDirectlyReferencedTypes();
+        model.directlyReferencedTypes();
 
-        Set<Type> referencedTypes = model.getDirectlyReferencedTypes();
+        Set<Type> referencedTypes = model.directlyReferencedTypes();
         Set<Class<?>> referencedClasses = getReferencedClasses(referencedTypes, settings);
         final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         referencedClasses = filterInputClasses(referencedClasses);
@@ -67,13 +67,13 @@ public class ServiceEmitter {
 
     public void emitTypescriptInterface(OutputWriter interfaceWriter) {
         interfaceWriter.writeLine("");
-        interfaceWriter.writeLine("export interface " + GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor()).addTypeNamePrefix + model.getName() + " {");
+        interfaceWriter.writeLine("export interface " + GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor()).addTypeNamePrefix + model.name() + " {");
         interfaceWriter.increaseIndent();
 
-        for (ServiceEndpointModel endpointModel: model.getEndpointModels()) {
-            String line = endpointModel.endpointName + "(";
+        for (ServiceEndpointModel endpointModel: model.endpointModels()) {
+            String line = endpointModel.endpointName() + "(";
             line += getEndpointParametersString(endpointModel);
-            line += "): ng.IPromise<ng.IHttpPromiseCallbackArg<" + endpointModel.tsReturnType.toString() + ">>;";
+            line += "): ng.IPromise<ng.IHttpPromiseCallbackArg<" + endpointModel.tsReturnType().toString() + ">>;";
             interfaceWriter.writeLine(line);
         }
 
@@ -83,7 +83,7 @@ public class ServiceEmitter {
 
     public void emitTypescriptClass(OutputWriter classWriter) {
         classWriter.writeLine("");
-        classWriter.writeLine("export class " + model.getName() + " implements " + GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor()).addTypeNamePrefix + model.getName() + " {");
+        classWriter.writeLine("export class " + model.name() + " implements " + GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor()).addTypeNamePrefix + model.name() + " {");
         classWriter.increaseIndent();
 
         classWriter.writeLine("");
@@ -94,36 +94,36 @@ public class ServiceEmitter {
         classWriter.decreaseIndent();
         classWriter.writeLine("}");
 
-        for (ServiceEndpointModel endpointModel: model.getEndpointModels()) {
+        for (ServiceEndpointModel endpointModel: model.endpointModels()) {
             classWriter.writeLine("");
-            String line = "public " + endpointModel.endpointName + "(";
+            String line = "public " + endpointModel.endpointName() + "(";
             line += getEndpointParametersString(endpointModel);
             line += ") {";
             classWriter.writeLine(line);
             classWriter.increaseIndent();
             classWriter.writeLine("var httpCallData = <IHttpEndpointOptions> {");
             classWriter.increaseIndent();
-            classWriter.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.getName().charAt(0)) + model.getName().substring(1) + "\",");
-            classWriter.writeLine("endpointPath: \"" + model.getServicePath() + "/" + endpointModel.endpointPath + "\",");
-            classWriter.writeLine("method: \"" + endpointModel.endpointMethodType + "\",");
-            classWriter.writeLine("mediaType: \"" + endpointModel.endpointMediaType + "\",");
+            classWriter.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
+            classWriter.writeLine("endpointPath: \"" + model.servicePath() + "/" + endpointModel.endpointPath() + "\",");
+            classWriter.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
+            classWriter.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
             List<String> requiredHeaders = Lists.newArrayList();
             List<String> pathArguments = Lists.newArrayList();
             List<String> queryArguments = Lists.newArrayList();
             String dataArgument = null;
-            for (ServiceEndpointParameterModel parameterModel : endpointModel.parameters) {
-                if (parameterModel.headerParam != null) {
-                    requiredHeaders.add("\"" + parameterModel.headerParam + "\"");
-                } else if (parameterModel.pathParam != null) {
+            for (ServiceEndpointParameterModel parameterModel : endpointModel.parameters()) {
+                if (parameterModel.headerParam() != null) {
+                    requiredHeaders.add("\"" + parameterModel.headerParam() + "\"");
+                } else if (parameterModel.pathParam() != null) {
                     pathArguments.add(parameterModel.getParameterName(settings));
-                } else if (parameterModel.queryParam != null) {
-                    queryArguments.add(parameterModel.queryParam);
+                } else if (parameterModel.queryParam() != null) {
+                    queryArguments.add(parameterModel.queryParam());
                 } else {
                     if (dataArgument != null) {
                         throw new IllegalStateException("There should only be one data argument per endpoint. Found both" + dataArgument + " and " + parameterModel.getParameterName(settings));
                     }
                     dataArgument = parameterModel.getParameterName(settings);
-                    if (parameterModel.tsType.toString().equals("string")) {
+                    if (parameterModel.tsType().toString().equals("string")) {
                         // strings have to be wrapped in quotes in order to be valid json
                         dataArgument = "`\"${" + parameterModel.getParameterName(settings) + "}\"`";
                     }
@@ -141,7 +141,7 @@ public class ServiceEmitter {
             classWriter.writeLine("data: " + dataArgument);
             classWriter.decreaseIndent();
             classWriter.writeLine("};");
-            classWriter.writeLine("return this.httpApiBridge.callEndpoint<" + endpointModel.tsReturnType.toString() + ">(httpCallData);");
+            classWriter.writeLine("return this.httpApiBridge.callEndpoint<" + endpointModel.tsReturnType().toString() + ">(httpCallData);");
             classWriter.decreaseIndent();
             classWriter.writeLine("}");
         }
@@ -151,13 +151,13 @@ public class ServiceEmitter {
 
     public String getEndpointParametersString(ServiceEndpointModel endpointModel) {
         List<String> parameterStrings = Lists.newArrayList();
-        for (ServiceEndpointParameterModel parameterModel : endpointModel.parameters) {
-            if (parameterModel.headerParam != null) {
+        for (ServiceEndpointParameterModel parameterModel : endpointModel.parameters()) {
+            if (parameterModel.headerParam() != null) {
                 //continue, header params are implicit
                 continue;
             }
-            String optionalString = parameterModel.queryParam != null ? "?" : "";
-            parameterStrings.add(parameterModel.getParameterName(settings) + optionalString + ": " + parameterModel.tsType.toString());
+            String optionalString = parameterModel.queryParam() != null ? "?" : "";
+            parameterStrings.add(parameterModel.getParameterName(settings) + optionalString + ": " + parameterModel.tsType().toString());
         }
 
         return Joiner.on(", ").join(parameterStrings);

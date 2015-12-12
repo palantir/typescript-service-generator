@@ -3,19 +3,26 @@ package com.palantir.code.ts.generator;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.immutables.value.Value;
+
 import cz.habarta.typescript.generator.TsType;
 
-public class ServiceEndpointModel implements Comparable<ServiceEndpointModel> {
-    public Type javaReturnType;
-    public TsType tsReturnType;
-    public List<ServiceEndpointParameterModel> parameters;
-    public String endpointName;
-    public String endpointPath;
-    public String endpointMethodType;
-    public String endpointMediaType;
+@Value.Immutable
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
+public abstract class ServiceEndpointModel implements Comparable<ServiceEndpointModel> {
+    public abstract Type javaReturnType();
+    public abstract TsType tsReturnType();
+    public abstract List<ServiceEndpointParameterModel> parameters();
+    public abstract String endpointName();
+    public abstract String endpointPath();
+    public abstract String endpointMethodType();
+    @Value.Default
+    public String endpointMediaType() {
+        return "application/json";
+    }
 
     @Override
     public int compareTo(ServiceEndpointModel o) {
-        return this.endpointName.compareTo(o.endpointName);
+        return this.endpointName().compareTo(o.endpointName());
     }
 }
