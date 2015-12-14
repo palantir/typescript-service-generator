@@ -20,6 +20,9 @@ import org.codehaus.jackson.type.JavaType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.palantir.code.ts.generator.model.ServiceEndpointModel;
+import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
+import com.palantir.code.ts.generator.model.ServiceModel;
 
 import cz.habarta.typescript.generator.ModelCompiler;
 import cz.habarta.typescript.generator.Settings;
@@ -30,28 +33,27 @@ import cz.habarta.typescript.generator.TypeProcessor.Context;
 import cz.habarta.typescript.generator.TypeProcessor.Result;
 import cz.habarta.typescript.generator.TypeScriptGenerator;
 
-public class ServiceEmitter {
+public final class ServiceEmitter {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private final ServiceModel model;
-    private final GenerationSettings settings;
+    private final TypescriptServiceGeneratorConfiguration settings;
 
-    public ServiceEmitter(ServiceModel model, GenerationSettings settings) {
+    public ServiceEmitter(ServiceModel model, TypescriptServiceGeneratorConfiguration settings) {
         this.model = model;
         this.settings = settings;
     }
 
-    public void emitTypescriptTypes(OutputWriter writer, GenerationSettings settings) {
-        model.directlyReferencedTypes();
+    public void emitTypescriptTypes(IndentedOutputWriter writer, TypescriptServiceGeneratorConfiguration settings) {
+        Settings settingsToUse = settings.getSettings();
+        TypeProcessor baseTypeProcessor = settingsToUse.customTypeProcessor;
 
         Set<Type> referencedTypes = model.directlyReferencedTypes();
         Set<Class<?>> referencedClasses = getReferencedClasses(referencedTypes, settings);
-        final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         referencedClasses = filterInputClasses(referencedClasses);
-        ByteArrayOutputStream typeDeclarations = new ByteArrayOutputStream();
-        Settings settingsToUse = GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor());
-        TypeProcessor baseTypeProcessor = settingsToUse.customTypeProcessor;
+
+        final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         settingsToUse.customTypeProcessor = new TypeProcessor.Chain(new TypeProcessor() {
             @Override
             public Result processType(Type javaType, Context context) {
@@ -59,31 +61,17 @@ public class ServiceEmitter {
                 return null;
             }
         }, baseTypeProcessor);
+
         TypeScriptGenerator typescriptGenerator = new TypeScriptGenerator(settingsToUse);
+        ByteArrayOutputStream typeDeclarations = new ByteArrayOutputStream();
         typescriptGenerator.generateEmbeddableTypeScript(Lists.newArrayList(referencedClasses.iterator()), typeDeclarations, true, 1);
         writeEnums(writer, discoveredTypes, typescriptGenerator.getModelCompiler());
         writer.write(new String(typeDeclarations.toByteArray()));
     }
 
-    public void emitTypescriptInterface(OutputWriter interfaceWriter) {
-        interfaceWriter.writeLine("");
-        interfaceWriter.writeLine("export interface " + GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor()).addTypeNamePrefix + model.name() + " {");
-        interfaceWriter.increaseIndent();
-
-        for (ServiceEndpointModel endpointModel: model.endpointModels()) {
-            String line = endpointModel.endpointName() + "(";
-            line += getEndpointParametersString(endpointModel);
-            line += "): ng.IPromise<ng.IHttpPromiseCallbackArg<" + endpointModel.tsReturnType().toString() + ">>;";
-            interfaceWriter.writeLine(line);
-        }
-
-        interfaceWriter.decreaseIndent();
-        interfaceWriter.writeLine("}");
-    }
-
-    public void emitTypescriptClass(OutputWriter classWriter) {
+    public void emitTypescriptClass(IndentedOutputWriter classWriter) {
         classWriter.writeLine("");
-        classWriter.writeLine("export class " + model.name() + " implements " + GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor()).addTypeNamePrefix + model.name() + " {");
+        classWriter.writeLine("export class " + model.name() + " implements " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
         classWriter.increaseIndent();
 
         classWriter.writeLine("");
@@ -141,6 +129,7 @@ public class ServiceEmitter {
             classWriter.writeLine("data: " + dataArgument);
             classWriter.decreaseIndent();
             classWriter.writeLine("};");
+            // TODO: assumes angular promises are used, which is less general than this could be
             classWriter.writeLine("return this.httpApiBridge.callEndpoint<" + endpointModel.tsReturnType().toString() + ">(httpCallData);");
             classWriter.decreaseIndent();
             classWriter.writeLine("}");
@@ -149,7 +138,23 @@ public class ServiceEmitter {
         classWriter.writeLine("}");
     }
 
-    public String getEndpointParametersString(ServiceEndpointModel endpointModel) {
+    public void emitTypescriptInterface(IndentedOutputWriter interfaceWriter) {
+        interfaceWriter.writeLine("");
+        interfaceWriter.writeLine("export interface " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
+        interfaceWriter.increaseIndent();
+
+        for (ServiceEndpointModel endpointModel: model.endpointModels()) {
+            String line = endpointModel.endpointName() + "(";
+            line += getEndpointParametersString(endpointModel);
+            line += "): ng.IPromise<ng.IHttpPromiseCallbackArg<" + endpointModel.tsReturnType().toString() + ">>;";
+            interfaceWriter.writeLine(line);
+        }
+
+        interfaceWriter.decreaseIndent();
+        interfaceWriter.writeLine("}");
+    }
+
+    private String getEndpointParametersString(ServiceEndpointModel endpointModel) {
         List<String> parameterStrings = Lists.newArrayList();
         for (ServiceEndpointParameterModel parameterModel : endpointModel.parameters()) {
             if (parameterModel.headerParam() != null) {
@@ -163,7 +168,8 @@ public class ServiceEmitter {
         return Joiner.on(", ").join(parameterStrings);
     }
 
-    private void writeEnums(OutputWriter writer, Set<Type> referencedTypes, ModelCompiler compiler) {
+    private void writeEnums(IndentedOutputWriter writer, Set<Type> referencedTypes, ModelCompiler compiler) {
+        //TODO: this won't be necessary once typescript supports enums
         List<EnumType> enums = Lists.newArrayList();
         for (Type type : referencedTypes) {
             TsType tsType = compiler.typeFromJava(type);
@@ -173,8 +179,8 @@ public class ServiceEmitter {
         }
         Collections.sort(enums, new Comparator<EnumType>() {
             @Override
-            public int compare(EnumType o1, EnumType o2) {
-                return o1.name.compareTo(o2.name);
+            public int compare(EnumType a, EnumType b) {
+                return a.name.compareTo(b.name);
             }
         });
         for (EnumType tsEnum : enums) {
@@ -208,6 +214,9 @@ public class ServiceEmitter {
             if (beanClass == URI.class) {
                 continue;
             }
+
+            // Classes directly passed in to typescript-generator need to be directly serializable, so filter out the ones that serializers
+            // exist for.
             SerializationConfig serializationConfig = objectMapper.getSerializationConfig();
             final JavaType simpleType = objectMapper.constructType(beanClass);
             try {
@@ -222,12 +231,14 @@ public class ServiceEmitter {
         return typesToUse;
     }
 
-    public static Set<Class<?>> getReferencedClasses(Set<Type> referencedTypes, GenerationSettings settings) {
+    public static Set<Class<?>> getReferencedClasses(Set<Type> referencedTypes, TypescriptServiceGeneratorConfiguration settings) {
         Set<Class<?>> ret = Sets.newHashSet();
         for (Type t : referencedTypes) {
-            if (settings.getIgnoredClasses().contains(t)) {
+            if (settings.ignoredClasses().contains(t)) {
                 continue;
             }
+
+            // dummy context used for below check
             Context nullContext = new Context() {
 
                 @Override
@@ -246,7 +257,8 @@ public class ServiceEmitter {
                 continue;
             }
 
-            if (GenerationSettings.Utils.getOverridingTypeParser(settings.getCustomTypeProcessor()).processType(t, nullContext) == null) {
+            // Don't add any classes that the user has made an exception for
+            if (settings.customTypeProcessor().processType(t, nullContext) == null) {
                 if (t instanceof Class) {
                     ret.add((Class<?>) t);
                 } else if(t instanceof ParameterizedType) {

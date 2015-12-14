@@ -1,6 +1,6 @@
-package com.palantir.code.ts.generator;
+package com.palantir.code.ts.generator.utils;
 
-public class PathUtils {
+public final class PathUtils {
 
     private PathUtils() {
         // no

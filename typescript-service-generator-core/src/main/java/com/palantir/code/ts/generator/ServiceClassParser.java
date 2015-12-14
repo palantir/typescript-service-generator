@@ -3,7 +3,6 @@ package com.palantir.code.ts.generator;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,39 +23,46 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.palantir.code.ts.generator.model.ImmutableServiceEndpointModel;
+import com.palantir.code.ts.generator.model.ImmutableServiceEndpointParameterModel;
+import com.palantir.code.ts.generator.model.ImmutableServiceModel;
+import com.palantir.code.ts.generator.model.ServiceEndpointModel;
+import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
+import com.palantir.code.ts.generator.model.ServiceModel;
+import com.palantir.code.ts.generator.utils.PathUtils;
 
 import cz.habarta.typescript.generator.ModelCompiler;
 import cz.habarta.typescript.generator.TsType;
 import cz.habarta.typescript.generator.TypeScriptGenerator;
 
 
-public class ServiceClassParser {
+public final class ServiceClassParser {
 
-    public ServiceModel parseServiceClass(Class<?> serviceClass, GenerationSettings settings, OutputWriter writer) {
+    public ServiceModel parseServiceClass(Class<?> serviceClass, TypescriptServiceGeneratorConfiguration settings, IndentedOutputWriter writer) {
         ImmutableServiceModel.Builder serviceModel = ImmutableServiceModel.builder();
-        Path pathAnnotation = serviceClass.getAnnotation(Path.class);
-        serviceModel.servicePath(PathUtils.trimSlashes(pathAnnotation.value()));
+        Path servicePathAnnotation = serviceClass.getAnnotation(Path.class);
+        serviceModel.servicePath(PathUtils.trimSlashes(servicePathAnnotation.value()));
         serviceModel.name(serviceClass.getSimpleName());
-        serviceModel.pkg(serviceClass.getPackage().getName());
 
+        // find and stores all types that are referenced by this service
         Set<Type> referencedTypes = Sets.newHashSet();
         for (Method method : serviceClass.getMethods()) {
             referencedTypes.addAll(getTypesFromEndpoint(method));
         }
         serviceModel.directlyReferencedTypes(referencedTypes);
 
-        TypeScriptGenerator typescriptGenerator = new TypeScriptGenerator(GenerationSettings.Utils.getSettings(settings.getCustomTypeProcessor()));
-        ModelCompiler compiler = typescriptGenerator.getModelCompiler();
+        ModelCompiler compiler = new TypeScriptGenerator(settings.getSettings()).getModelCompiler();
 
-        Collection<ServiceEndpointModel> endpointModels = Lists.newArrayList();
+        List<ServiceEndpointModel> endpointModels = Lists.newArrayList();
         for (Method method : serviceClass.getMethods()) {
             endpointModels.add(computeEndpointModel(method, compiler, settings));
         }
+        Collections.sort(endpointModels);
         serviceModel.endpointModels(endpointModels);
         return serviceModel.build();
     }
 
-    private ServiceEndpointModel computeEndpointModel(Method endpoint, ModelCompiler compiler, GenerationSettings settings) {
+    private static ServiceEndpointModel computeEndpointModel(Method endpoint, ModelCompiler compiler, TypescriptServiceGeneratorConfiguration settings) {
         ImmutableServiceEndpointModel.Builder ret = ImmutableServiceEndpointModel.builder();
         ret.endpointName(endpoint.getName());
         ret.javaReturnType(endpoint.getGenericReturnType());
@@ -64,7 +70,7 @@ public class ServiceClassParser {
         ret.endpointMethodType(getMethodType(endpoint));
         ret.endpointPath(PathUtils.trimSlashes(endpoint.getAnnotation(Path.class).value()));
         Consumes consumes = endpoint.getAnnotation(Consumes.class);
-        if (consumes != null && consumes.value() != null && consumes.value().length > 0) {
+        if (consumes != null) {
             if (consumes.value().length > 1) {
                 throw new IllegalArgumentException("Don't know how to handle an endpoint with multiple consume types");
             }
@@ -72,16 +78,18 @@ public class ServiceClassParser {
         }
 
         List<Map<Class<?>, Annotation>> annotationList = getParamterAnnotationMap(endpoint);
-        int annotationListIndex = 0;
         List<ServiceEndpointParameterModel> mandatoryParameters = Lists.newArrayList();
         List<ServiceEndpointParameterModel> optionalParameters = Lists.newArrayList();
+        int annotationListIndex = 0;
         for (Type javaParameterType : endpoint.getGenericParameterTypes()) {
             Map<Class<?>, Annotation> annotations = annotationList.get(annotationListIndex);
             ImmutableServiceEndpointParameterModel.Builder parameterModel = ImmutableServiceEndpointParameterModel.builder();
 
-            if (!Collections.disjoint(annotations.keySet(), settings.getIgnoredAnnotations())) {
+            // if parameter is annotated with any ignored annotations, skip it entirely
+            if (!Collections.disjoint(annotations.keySet(), settings.ignoredAnnotations())) {
                 continue;
             }
+
             PathParam path = (PathParam) annotations.get(PathParam.class);
             if (path != null) {
                 parameterModel.pathParam(path.value());
@@ -94,6 +102,7 @@ public class ServiceClassParser {
             if (query != null) {
                 parameterModel.queryParam(query.value());
             }
+
             parameterModel.javaType(javaParameterType);
             TsType tsType = compiler.typeFromJavaWithReplacement(javaParameterType);
             parameterModel.tsType(tsType);
@@ -104,8 +113,20 @@ public class ServiceClassParser {
             }
             annotationListIndex++;
         }
+
         ret.parameters(ImmutableList.<ServiceEndpointParameterModel> builder().addAll(mandatoryParameters).addAll(optionalParameters).build());
         return ret.build();
+    }
+
+    private static String getMethodType(Method endpoint) {
+        @SuppressWarnings("unchecked")
+        List<Class<? extends Annotation>> annotationClasses = Lists.newArrayList(POST.class, GET.class, DELETE.class, PUT.class, OPTIONS.class);
+        for (Class<? extends Annotation> annotationClass : annotationClasses) {
+            if (endpoint.getAnnotation(annotationClass) != null) {
+                return annotationClass.getSimpleName();
+            }
+        }
+        throw new IllegalArgumentException("All endpoints should specify their method type, but one didn't: " + endpoint);
     }
 
     private static List<Map<Class<?>, Annotation>> getParamterAnnotationMap(Method endpoint) {
@@ -122,18 +143,7 @@ public class ServiceClassParser {
         return ret;
     }
 
-    private static String getMethodType(Method endpoint) {
-        @SuppressWarnings("unchecked")
-        List<Class<? extends Annotation>> annotationClasses = Lists.newArrayList(POST.class, GET.class, DELETE.class, PUT.class, OPTIONS.class);
-        for (Class<? extends Annotation> annotationClass : annotationClasses) {
-            if (endpoint.getAnnotation(annotationClass) != null) {
-                return annotationClass.getSimpleName();
-            }
-        }
-        throw new IllegalArgumentException("All endpoints should specify their method type, but one didn't: " + endpoint);
-    }
-
-    private Set<Type> getTypesFromEndpoint(Method endpoint) {
+    private static Set<Type> getTypesFromEndpoint(Method endpoint) {
         Set<Type> ret = Sets.newHashSet();
         Class<?> returnType = endpoint.getReturnType();
         ret.add(returnType);

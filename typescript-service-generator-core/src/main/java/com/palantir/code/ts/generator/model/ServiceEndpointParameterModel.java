@@ -1,4 +1,4 @@
-package com.palantir.code.ts.generator;
+package com.palantir.code.ts.generator.model;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -6,6 +6,8 @@ import java.lang.reflect.Type;
 import javax.annotation.Nullable;
 
 import org.immutables.value.Value;
+
+import com.palantir.code.ts.generator.TypescriptServiceGeneratorConfiguration;
 
 import cz.habarta.typescript.generator.TsType;
 
@@ -18,7 +20,7 @@ public abstract class ServiceEndpointParameterModel {
     public abstract Type javaType();
     public abstract TsType tsType();
 
-    public String getParameterName(GenerationSettings settings) {
+    public String getParameterName(TypescriptServiceGeneratorConfiguration settings) {
         if (pathParam() != null) {
             return pathParam();
         } else if (queryParam() != null) {

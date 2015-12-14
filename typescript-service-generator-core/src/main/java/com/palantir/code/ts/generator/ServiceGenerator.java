@@ -9,46 +9,47 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
-public class ServiceGenerator {
+import com.palantir.code.ts.generator.model.ServiceModel;
 
-    private final File generatedFolderLocation;
-    private final GenerationSettings settings;
+public final class ServiceGenerator {
 
-    public ServiceGenerator(File generatedFolderLocation, GenerationSettings settings) {
-        this.generatedFolderLocation = generatedFolderLocation;
+    private final TypescriptServiceGeneratorConfiguration settings;
+
+    public ServiceGenerator(TypescriptServiceGeneratorConfiguration settings) {
         this.settings = settings;
 
+        // Write out httpApiBridge file
         String bridgeFile = "httpApiBridge.ts";
-        OutputWriter writer;
+        IndentedOutputWriter writer;
         try {
-            writer = new OutputWriter(0, new FileOutputStream(new File(this.generatedFolderLocation, bridgeFile)), settings);
+            writer = new IndentedOutputWriter(new FileOutputStream(new File(settings.generatedFolderLocation(), bridgeFile)), settings);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
         beginService(writer, null);
-        writer.writeLine("");
 
+        writer.writeLine("");
         List<String> bridgeFileLines = null;
         try {
             bridgeFileLines = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(bridgeFile));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         for (String line : bridgeFileLines) {
             writer.writeLine(line);
         }
+
         endService(writer);
     }
 
     public void generateTypescriptService(Class<?> clazz) {
         OutputStream output = null;
         try {
-            output = new FileOutputStream(new File(this.generatedFolderLocation, Character.toLowerCase(clazz.getSimpleName().charAt(0)) + clazz.getSimpleName().substring(1) + ".ts"));
+            output = new FileOutputStream(new File(settings.generatedFolderLocation(), Character.toLowerCase(clazz.getSimpleName().charAt(0)) + clazz.getSimpleName().substring(1) + ".ts"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        OutputWriter writer = new OutputWriter(0, output, settings);
+        IndentedOutputWriter writer = new IndentedOutputWriter(output, settings);
         beginService(writer, clazz.getSimpleName());
 
         ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(clazz, settings, writer);
@@ -60,18 +61,18 @@ public class ServiceGenerator {
         endService(writer);
     }
 
-    private void beginService(OutputWriter writer, String subModuleName) {
-        String moduleName = settings.getTypescriptModule();
+    private void beginService(IndentedOutputWriter writer, String subModuleName) {
+        String moduleName = settings.typescriptModule();
         if (subModuleName != null) {
             moduleName += "." + subModuleName;
         }
-        writer.writeLine(settings.getCopyrightHeader());
-        writer.writeLine(settings.getGeneratedMessage());
+        writer.writeLine(settings.copyrightHeader());
+        writer.writeLine(settings.generatedMessage());
         writer.writeLine("module " + moduleName + " {");
         writer.increaseIndent();
     }
 
-    private void endService(OutputWriter writer) {
+    private void endService(IndentedOutputWriter writer) {
         writer.decreaseIndent();
         writer.writeLine("}");
         writer.close();

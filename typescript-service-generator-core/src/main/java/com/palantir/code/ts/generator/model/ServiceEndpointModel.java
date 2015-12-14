@@ -1,4 +1,4 @@
-package com.palantir.code.ts.generator;
+package com.palantir.code.ts.generator.model;
 
 import java.lang.reflect.Type;
 import java.util.List;

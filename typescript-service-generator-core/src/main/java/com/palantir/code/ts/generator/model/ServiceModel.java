@@ -1,4 +1,4 @@
-package com.palantir.code.ts.generator;
+package com.palantir.code.ts.generator.model;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -11,7 +11,6 @@ import org.immutables.value.Value;
 public abstract class ServiceModel {
     public abstract Set<Type> directlyReferencedTypes();
     public abstract String name();
-    public abstract String pkg();
     public abstract String servicePath();
     public abstract List<ServiceEndpointModel> endpointModels();
 }
