@@ -51,9 +51,9 @@ public final class ServiceEmitter {
 
         Set<Type> referencedTypes = model.directlyReferencedTypes();
         Set<Class<?>> referencedClasses = getReferencedClasses(referencedTypes, settings);
+        final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         referencedClasses = filterInputClasses(referencedClasses);
 
-        final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         settingsToUse.customTypeProcessor = new TypeProcessor.Chain(new TypeProcessor() {
             @Override
             public Result processType(Type javaType, Context context) {
