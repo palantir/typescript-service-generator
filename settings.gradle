@@ -1,3 +1,4 @@
 rootProject.name = "typescript-service-generator"
 
 include "typescript-service-generator-core"
+include "typescript-service-generator-examples"

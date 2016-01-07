@@ -5,6 +5,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,10 +25,21 @@ public abstract class TypescriptServiceGeneratorConfiguration {
 
     @Value.Parameter
     public abstract String copyrightHeader();
+    @Value.Default
+    public TypeProcessor customTypeProcessor() {
+        return new TypeProcessor() {
+            @Override
+            public Result processType(Type javaType, Context context) {
+                return null;
+            }
+        };
+    }
     @Value.Parameter
-    public abstract TypeProcessor customTypeProcessor();
-    @Value.Parameter
-    public abstract Set<Class<?>> ignoredAnnotations();
+    public abstract String genericEndpointReturnType();
+    @Value.Default
+    public Set<Class<?>> ignoredAnnotations() {
+        return new HashSet<>();
+    }
     @Value.Parameter
     public abstract String typescriptModule();
     @Value.Parameter

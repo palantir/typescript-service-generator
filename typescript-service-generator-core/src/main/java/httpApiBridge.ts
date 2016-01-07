@@ -10,5 +10,5 @@ export interface IHttpEndpointOptions {
 }
 
 export interface IHttpApiBridge {
-    callEndpoint<T>(parameters: IHttpEndpointOptions): ng.IPromise<ng.IHttpPromiseCallbackArg<T>>;
+    callEndpoint<T>(parameters: IHttpEndpointOptions): %s;
 }

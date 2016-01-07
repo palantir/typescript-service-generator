@@ -1,0 +1,5 @@
+apply from: "${rootDir}/shared.gradle"
+
+dependencies {
+    compile project(":typescript-service-generator-core")
+}

@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.palantir.code.ts.generator.model.ServiceModel;
 
 public final class ServiceGenerator {
@@ -35,6 +37,7 @@ public final class ServiceGenerator {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        bridgeFileLines = Lists.newArrayList(String.format(Joiner.on(settings.getSettings().newline).join(bridgeFileLines), String.format(settings.genericEndpointReturnType(), "T")).split("\n"));
         for (String line : bridgeFileLines) {
             writer.writeLine(line);
         }

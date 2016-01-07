@@ -146,7 +146,7 @@ public final class ServiceEmitter {
         for (ServiceEndpointModel endpointModel: model.endpointModels()) {
             String line = endpointModel.endpointName() + "(";
             line += getEndpointParametersString(endpointModel);
-            line += "): ng.IPromise<ng.IHttpPromiseCallbackArg<" + endpointModel.tsReturnType().toString() + ">>;";
+            line += String.format("): " + settings.genericEndpointReturnType(), endpointModel.tsReturnType().toString()) + ";";
             interfaceWriter.writeLine(line);
         }
 
