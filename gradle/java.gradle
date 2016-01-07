@@ -1,0 +1,16 @@
+apply plugin: "java"
+apply plugin: "eclipse"
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+  provided
+}
+
+sourceSets {
+  main.compileClasspath += configurations.provided
+  test.compileClasspath += configurations.provided
+  test.runtimeClasspath += configurations.provided
+}
