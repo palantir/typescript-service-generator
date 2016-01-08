@@ -1,47 +1,18 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPlugin}"
+    }
+}
+
 plugins {
-    id 'com.jfrog.bintray' version '1.2'
-    id 'maven-publish'
+    id 'com.palantir.git-version' version '0.4.0'
 }
 
-apply from: "$rootDir/gradle/java.gradle"
-
-group 'com.palantir.typescript-service-generator'
-version '0.0.1'
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier 'sources'
+allprojects {
+    group 'com.palantir.ts'
+    version gitVersion()
 }
-
-publishing {
-    publications {
-        bintray(MavenPublication) {
-            from components.java
-            artifact(sourceJar) {
-                classifier 'sources'
-            }
-        }
-    }
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'releases'
-        name = 'typescript-service-generator'
-        userOrg = 'palantir'
-        licenses = ['MIT']
-        publications = ['bintray']
-    }
-}
-
-bintrayUpload.onlyIf {
-    logger.error(System.getenv('BINTRAY_USER'))
-    logger.error(System.getenv('BINTRAY_KEY'))
-    System.getenv('BINTRAY_USER') && System.getenv('BINTRAY_KEY') && project.version ==~ /\d+\.\d+\.\d+/
-}
-
-bintrayUpload.dependsOn { generatePomFileForBintrayPublication }
-bintrayUpload.dependsOn { sourceJar }
-bintrayUpload.dependsOn { build }
