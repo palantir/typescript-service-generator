@@ -23,6 +23,7 @@ import com.google.common.collect.Sets;
 import com.palantir.code.ts.generator.model.ServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ServiceModel;
+import com.palantir.code.ts.generator.utils.PathUtils;
 
 import cz.habarta.typescript.generator.ModelCompiler;
 import cz.habarta.typescript.generator.Settings;
@@ -92,7 +93,7 @@ public final class ServiceEmitter {
             classWriter.writeLine("var httpCallData = <IHttpEndpointOptions> {");
             classWriter.increaseIndent();
             classWriter.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
-            classWriter.writeLine("endpointPath: \"" + model.servicePath() + "/" + endpointModel.endpointPath() + "\",");
+            classWriter.writeLine("endpointPath: \"" + getEndpointPathString(model, endpointModel) + "\",");
             classWriter.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
             classWriter.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
             List<String> requiredHeaders = Lists.newArrayList();
@@ -152,6 +153,11 @@ public final class ServiceEmitter {
 
         interfaceWriter.decreaseIndent();
         interfaceWriter.writeLine("}");
+    }
+
+    private String getEndpointPathString(ServiceModel model, ServiceEndpointModel endpointModel) {
+        String endpointPath = model.servicePath() + "/" + endpointModel.endpointPath();
+        return PathUtils.trimSlashes(endpointPath);
     }
 
     private String getEndpointParametersString(ServiceEndpointModel endpointModel) {
