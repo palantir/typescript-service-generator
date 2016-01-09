@@ -49,7 +49,7 @@ public final class ServiceClassParser {
         for (Method method : serviceClass.getMethods()) {
             referencedTypes.addAll(getTypesFromEndpoint(method));
         }
-        serviceModel.directlyReferencedTypes(referencedTypes);
+        serviceModel.referencedTypes(referencedTypes);
 
         ModelCompiler compiler = new TypeScriptGenerator(settings.getSettings()).getModelCompiler();
 
@@ -145,8 +145,7 @@ public final class ServiceClassParser {
 
     private static Set<Type> getTypesFromEndpoint(Method endpoint) {
         Set<Type> ret = Sets.newHashSet();
-        Class<?> returnType = endpoint.getReturnType();
-        ret.add(returnType);
+        ret.add(endpoint.getReturnType());
         ret.add(endpoint.getGenericReturnType());
         ret.addAll(Lists.newArrayList(endpoint.getParameterTypes()));
         return ret;

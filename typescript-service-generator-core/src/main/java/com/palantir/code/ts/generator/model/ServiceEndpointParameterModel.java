@@ -7,8 +7,6 @@ import javax.annotation.Nullable;
 
 import org.immutables.value.Value;
 
-import com.palantir.code.ts.generator.TypescriptServiceGeneratorConfiguration;
-
 import cz.habarta.typescript.generator.TsType;
 
 @Value.Immutable
@@ -20,7 +18,7 @@ public abstract class ServiceEndpointParameterModel {
     public abstract Type javaType();
     public abstract TsType tsType();
 
-    public String getParameterName(TypescriptServiceGeneratorConfiguration settings) {
+    public String getParameterName() {
         if (pathParam() != null) {
             return pathParam();
         } else if (queryParam() != null) {
