@@ -36,21 +36,23 @@ import cz.habarta.typescript.generator.TypeScriptGenerator;
 
 public final class ServiceEmitter {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final ServiceModel model;
     private final TypescriptServiceGeneratorConfiguration settings;
+    private final IndentedOutputWriter writer;
 
-    public ServiceEmitter(ServiceModel model, TypescriptServiceGeneratorConfiguration settings) {
+    public ServiceEmitter(ServiceModel model, TypescriptServiceGeneratorConfiguration settings, IndentedOutputWriter writer) {
         this.model = model;
         this.settings = settings;
+        this.writer = writer;
     }
 
-    public void emitTypescriptTypes(IndentedOutputWriter writer, TypescriptServiceGeneratorConfiguration settings) {
+    public void emitTypescriptTypes(TypescriptServiceGeneratorConfiguration settings) {
         Settings settingsToUse = settings.getSettings();
         TypeProcessor baseTypeProcessor = settingsToUse.customTypeProcessor;
 
-        Set<Type> referencedTypes = model.directlyReferencedTypes();
+        Set<Type> referencedTypes = model.referencedTypes();
         Set<Class<?>> referencedClasses = getReferencedClasses(referencedTypes, settings);
         final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         referencedClasses = filterInputClasses(referencedClasses);
@@ -66,36 +68,36 @@ public final class ServiceEmitter {
         TypeScriptGenerator typescriptGenerator = new TypeScriptGenerator(settingsToUse);
         ByteArrayOutputStream typeDeclarations = new ByteArrayOutputStream();
         typescriptGenerator.generateEmbeddableTypeScript(Lists.newArrayList(referencedClasses.iterator()), typeDeclarations, true, 1);
-        writeEnums(writer, discoveredTypes, typescriptGenerator.getModelCompiler());
+        writeEnums(discoveredTypes, typescriptGenerator.getModelCompiler());
         writer.write(new String(typeDeclarations.toByteArray()));
     }
 
-    public void emitTypescriptClass(IndentedOutputWriter classWriter) {
-        classWriter.writeLine("");
-        classWriter.writeLine("export class " + model.name() + " implements " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
-        classWriter.increaseIndent();
+    public void emitTypescriptClass() {
+        writer.writeLine("");
+        writer.writeLine("export class " + model.name() + " implements " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
+        writer.increaseIndent();
 
-        classWriter.writeLine("");
-        classWriter.writeLine("private httpApiBridge: IHttpApiBridge;");
-        classWriter.writeLine("constructor(restApiBridge: IHttpApiBridge) {");
-        classWriter.increaseIndent();
-        classWriter.writeLine("this.httpApiBridge = restApiBridge;");
-        classWriter.decreaseIndent();
-        classWriter.writeLine("}");
+        writer.writeLine("");
+        writer.writeLine("private httpApiBridge: IHttpApiBridge;");
+        writer.writeLine("constructor(restApiBridge: IHttpApiBridge) {");
+        writer.increaseIndent();
+        writer.writeLine("this.httpApiBridge = restApiBridge;");
+        writer.decreaseIndent();
+        writer.writeLine("}");
 
         for (ServiceEndpointModel endpointModel: model.endpointModels()) {
-            classWriter.writeLine("");
+            writer.writeLine("");
             String line = "public " + endpointModel.endpointName() + "(";
             line += getEndpointParametersString(endpointModel);
             line += ") {";
-            classWriter.writeLine(line);
-            classWriter.increaseIndent();
-            classWriter.writeLine("var httpCallData = <IHttpEndpointOptions> {");
-            classWriter.increaseIndent();
-            classWriter.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
-            classWriter.writeLine("endpointPath: \"" + getEndpointPathString(model, endpointModel) + "\",");
-            classWriter.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
-            classWriter.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
+            writer.writeLine(line);
+            writer.increaseIndent();
+            writer.writeLine("var httpCallData = <IHttpEndpointOptions> {");
+            writer.increaseIndent();
+            writer.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
+            writer.writeLine("endpointPath: \"" + getEndpointPathString(model, endpointModel) + "\",");
+            writer.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
+            writer.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
             List<String> requiredHeaders = Lists.newArrayList();
             List<String> pathArguments = Lists.newArrayList();
             List<String> queryArguments = Lists.newArrayList();
@@ -104,55 +106,54 @@ public final class ServiceEmitter {
                 if (parameterModel.headerParam() != null) {
                     requiredHeaders.add("\"" + parameterModel.headerParam() + "\"");
                 } else if (parameterModel.pathParam() != null) {
-                    pathArguments.add(parameterModel.getParameterName(settings));
+                    pathArguments.add(parameterModel.getParameterName());
                 } else if (parameterModel.queryParam() != null) {
                     queryArguments.add(parameterModel.queryParam());
                 } else {
                     if (dataArgument != null) {
-                        throw new IllegalStateException("There should only be one data argument per endpoint. Found both" + dataArgument + " and " + parameterModel.getParameterName(settings));
+                        throw new IllegalStateException("There should only be one data argument per endpoint. Found both" + dataArgument + " and " + parameterModel.getParameterName());
                     }
-                    dataArgument = parameterModel.getParameterName(settings);
+                    dataArgument = parameterModel.getParameterName();
                     if (parameterModel.tsType().toString().equals("string")) {
                         // strings have to be wrapped in quotes in order to be valid json
-                        dataArgument = "`\"${" + parameterModel.getParameterName(settings) + "}\"`";
+                        dataArgument = "`\"${" + parameterModel.getParameterName() + "}\"`";
                     }
                 }
             }
-            classWriter.writeLine("requiredHeaders: [" + Joiner.on(", ").join(requiredHeaders) + "],");
-            classWriter.writeLine("pathArguments: [" + Joiner.on(", ").join(pathArguments) + "],");
-            classWriter.writeLine("queryArguments: {");
-            classWriter.increaseIndent();
+            writer.writeLine("requiredHeaders: [" + Joiner.on(", ").join(requiredHeaders) + "],");
+            writer.writeLine("pathArguments: [" + Joiner.on(", ").join(pathArguments) + "],");
+            writer.writeLine("queryArguments: {");
+            writer.increaseIndent();
             for (String queryArgument: queryArguments) {
-                classWriter.writeLine(queryArgument + ": " + queryArgument + ",");
+                writer.writeLine(queryArgument + ": " + queryArgument + ",");
             }
-            classWriter.decreaseIndent();
-            classWriter.writeLine("},");
-            classWriter.writeLine("data: " + dataArgument);
-            classWriter.decreaseIndent();
-            classWriter.writeLine("};");
-            // TODO: assumes angular promises are used, which is less general than this could be
-            classWriter.writeLine("return this.httpApiBridge.callEndpoint<" + endpointModel.tsReturnType().toString() + ">(httpCallData);");
-            classWriter.decreaseIndent();
-            classWriter.writeLine("}");
+            writer.decreaseIndent();
+            writer.writeLine("},");
+            writer.writeLine("data: " + dataArgument);
+            writer.decreaseIndent();
+            writer.writeLine("};");
+            writer.writeLine("return this.httpApiBridge.callEndpoint<" + endpointModel.tsReturnType().toString() + ">(httpCallData);");
+            writer.decreaseIndent();
+            writer.writeLine("}");
         }
-        classWriter.decreaseIndent();
-        classWriter.writeLine("}");
+        writer.decreaseIndent();
+        writer.writeLine("}");
     }
 
-    public void emitTypescriptInterface(IndentedOutputWriter interfaceWriter) {
-        interfaceWriter.writeLine("");
-        interfaceWriter.writeLine("export interface " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
-        interfaceWriter.increaseIndent();
+    public void emitTypescriptInterface() {
+        writer.writeLine("");
+        writer.writeLine("export interface " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
+        writer.increaseIndent();
 
         for (ServiceEndpointModel endpointModel: model.endpointModels()) {
             String line = endpointModel.endpointName() + "(";
             line += getEndpointParametersString(endpointModel);
             line += String.format("): " + settings.genericEndpointReturnType(), endpointModel.tsReturnType().toString()) + ";";
-            interfaceWriter.writeLine(line);
+            writer.writeLine(line);
         }
 
-        interfaceWriter.decreaseIndent();
-        interfaceWriter.writeLine("}");
+        writer.decreaseIndent();
+        writer.writeLine("}");
     }
 
     private String getEndpointPathString(ServiceModel model, ServiceEndpointModel endpointModel) {
@@ -168,13 +169,13 @@ public final class ServiceEmitter {
                 continue;
             }
             String optionalString = parameterModel.queryParam() != null ? "?" : "";
-            parameterStrings.add(parameterModel.getParameterName(settings) + optionalString + ": " + parameterModel.tsType().toString());
+            parameterStrings.add(parameterModel.getParameterName() + optionalString + ": " + parameterModel.tsType().toString());
         }
 
         return Joiner.on(", ").join(parameterStrings);
     }
 
-    private void writeEnums(IndentedOutputWriter writer, Set<Type> referencedTypes, ModelCompiler compiler) {
+    private void writeEnums(Set<Type> referencedTypes, ModelCompiler compiler) {
         //TODO: this won't be necessary once typescript supports enums
         List<EnumType> enums = Lists.newArrayList();
         for (Type type : referencedTypes) {
@@ -223,8 +224,8 @@ public final class ServiceEmitter {
 
             // Classes directly passed in to typescript-generator need to be directly serializable, so filter out the ones that serializers
             // exist for.
-            SerializationConfig serializationConfig = objectMapper.getSerializationConfig();
-            final JavaType simpleType = objectMapper.constructType(beanClass);
+            SerializationConfig serializationConfig = OBJECT_MAPPER.getSerializationConfig();
+            final JavaType simpleType = OBJECT_MAPPER.constructType(beanClass);
             try {
                 final JsonSerializer<?> jsonSerializer = BeanSerializerFactory.instance.createSerializer(serializationConfig, simpleType, null);
                 if (jsonSerializer == null || jsonSerializer instanceof BeanSerializer) {

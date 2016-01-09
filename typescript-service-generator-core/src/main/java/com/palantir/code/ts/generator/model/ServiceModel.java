@@ -9,7 +9,7 @@ import org.immutables.value.Value;
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
 public abstract class ServiceModel {
-    public abstract Set<Type> directlyReferencedTypes();
+    public abstract Set<Type> referencedTypes();
     public abstract String name();
     public abstract String servicePath();
     public abstract List<ServiceEndpointModel> endpointModels();

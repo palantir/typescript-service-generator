@@ -7,7 +7,7 @@ module Foundry.Http.MyService {
     }
 
     export interface IMyService {
-        helloWord(): HttpTypeWrapper<IMyObject>;
+        helloWorld(): HttpTypeWrapper<IMyObject>;
     }
 
     export class MyService implements IMyService {
@@ -17,7 +17,7 @@ module Foundry.Http.MyService {
             this.httpApiBridge = restApiBridge;
         }
 
-        public helloWord() {
+        public helloWorld() {
             var httpCallData = <IHttpEndpointOptions> {
                 serviceIdentifier: "myService",
                 endpointPath: "myservice/foo_get",

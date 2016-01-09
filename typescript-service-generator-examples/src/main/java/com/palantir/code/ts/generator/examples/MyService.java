@@ -12,5 +12,5 @@ public interface MyService {
     @Path("/foo_get")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    MyObject helloWord();
+    MyObject helloWorld();
 }

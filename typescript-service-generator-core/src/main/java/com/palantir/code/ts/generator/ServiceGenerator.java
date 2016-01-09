@@ -56,10 +56,10 @@ public final class ServiceGenerator {
         beginService(writer, clazz.getSimpleName());
 
         ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(clazz, settings, writer);
-        ServiceEmitter serviceEndpointEmitter = new ServiceEmitter(serviceModel, settings);
-        serviceEndpointEmitter.emitTypescriptTypes(writer, settings);
-        serviceEndpointEmitter.emitTypescriptInterface(writer);
-        serviceEndpointEmitter.emitTypescriptClass(writer);
+        ServiceEmitter serviceEndpointEmitter = new ServiceEmitter(serviceModel, settings, writer);
+        serviceEndpointEmitter.emitTypescriptTypes(settings);
+        serviceEndpointEmitter.emitTypescriptInterface();
+        serviceEndpointEmitter.emitTypescriptClass();
 
         endService(writer);
     }
