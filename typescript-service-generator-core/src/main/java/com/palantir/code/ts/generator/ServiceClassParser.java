@@ -2,6 +2,7 @@ package com.palantir.code.ts.generator;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +39,7 @@ import cz.habarta.typescript.generator.TypeScriptGenerator;
 
 public final class ServiceClassParser {
 
-    public ServiceModel parseServiceClass(Class<?> serviceClass, TypescriptServiceGeneratorConfiguration settings, IndentedOutputWriter writer) {
+    public ServiceModel parseServiceClass(Class<?> serviceClass, TypescriptServiceGeneratorConfiguration settings) {
         ImmutableServiceModel.Builder serviceModel = ImmutableServiceModel.builder();
         Path servicePathAnnotation = serviceClass.getAnnotation(Path.class);
         serviceModel.servicePath(PathUtils.trimSlashes(servicePathAnnotation.value()));
@@ -47,7 +48,7 @@ public final class ServiceClassParser {
         // find and stores all types that are referenced by this service
         Set<Type> referencedTypes = Sets.newHashSet();
         for (Method method : serviceClass.getMethods()) {
-            referencedTypes.addAll(getTypesFromEndpoint(method));
+            referencedTypes.addAll(getTypesFromEndpoint(method, settings));
         }
         serviceModel.referencedTypes(referencedTypes);
 
@@ -77,7 +78,7 @@ public final class ServiceClassParser {
             ret.endpointMediaType(consumes.value()[0]);
         }
 
-        List<Map<Class<?>, Annotation>> annotationList = getParamterAnnotationMap(endpoint);
+        List<Map<Class<?>, Annotation>> annotationList = getParamterAnnotationMaps(endpoint);
         List<ServiceEndpointParameterModel> mandatoryParameters = Lists.newArrayList();
         List<ServiceEndpointParameterModel> optionalParameters = Lists.newArrayList();
         int annotationListIndex = 0;
@@ -87,6 +88,7 @@ public final class ServiceClassParser {
 
             // if parameter is annotated with any ignored annotations, skip it entirely
             if (!Collections.disjoint(annotations.keySet(), settings.ignoredAnnotations())) {
+                annotationListIndex++;
                 continue;
             }
 
@@ -129,7 +131,7 @@ public final class ServiceClassParser {
         throw new IllegalArgumentException("All endpoints should specify their method type, but one didn't: " + endpoint);
     }
 
-    private static List<Map<Class<?>, Annotation>> getParamterAnnotationMap(Method endpoint) {
+    private static List<Map<Class<?>, Annotation>> getParamterAnnotationMaps(Method endpoint) {
         List<Map<Class<?>, Annotation>> ret = Lists.newArrayList();
         Annotation[][] array = endpoint.getParameterAnnotations();
         for (int i = 0; i < array.length; i++) {
@@ -143,11 +145,21 @@ public final class ServiceClassParser {
         return ret;
     }
 
-    private static Set<Type> getTypesFromEndpoint(Method endpoint) {
+    private static Set<Type> getTypesFromEndpoint(Method endpoint, TypescriptServiceGeneratorConfiguration settings) {
         Set<Type> ret = Sets.newHashSet();
         ret.add(endpoint.getReturnType());
         ret.add(endpoint.getGenericReturnType());
-        ret.addAll(Lists.newArrayList(endpoint.getParameterTypes()));
+
+        List<Map<Class<?>, Annotation>> parameterAnnotationMaps = getParamterAnnotationMaps(endpoint);
+        Parameter[] parameters = endpoint.getParameters();
+        for (int i = 0; i < parameterAnnotationMaps.size(); i++) {
+            Parameter parameter = parameters[i];
+            Map<Class<?>, Annotation> parameterAnnotationMap = parameterAnnotationMaps.get(i);
+            // if parameter is annotated with any ignored annotations, skip it entirely
+            if (Collections.disjoint(parameterAnnotationMap.keySet(), settings.ignoredAnnotations())) {
+                ret.add(parameter.getParameterizedType());
+            }
+        }
         return ret;
     }
 }

@@ -10,11 +10,9 @@ public final class IndentedOutputWriter {
     private int indent;
     private final PrintWriter writer;
     private final TypescriptServiceGeneratorConfiguration settings;
-    private final OutputStream output;
     private final Settings typeSettings;
 
     public IndentedOutputWriter(OutputStream stream, TypescriptServiceGeneratorConfiguration settings) {
-        this.output = stream;
         this.writer = new PrintWriter(stream);
         this.indent = 0;
         this.settings = settings;
@@ -31,10 +29,6 @@ public final class IndentedOutputWriter {
 
     public void increaseIndent() {
         indent++;
-    }
-
-    public OutputStream getOutputStream() {
-        return this.output;
     }
 
     public void write(String line) {
