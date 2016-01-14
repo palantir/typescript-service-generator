@@ -55,7 +55,7 @@ public final class ServiceGenerator {
         IndentedOutputWriter writer = new IndentedOutputWriter(output, settings);
         beginService(writer, clazz.getSimpleName());
 
-        ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(clazz, settings, writer);
+        ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(clazz, settings);
         ServiceEmitter serviceEndpointEmitter = new ServiceEmitter(serviceModel, settings, writer);
         serviceEndpointEmitter.emitTypescriptTypes(settings);
         serviceEndpointEmitter.emitTypescriptInterface();

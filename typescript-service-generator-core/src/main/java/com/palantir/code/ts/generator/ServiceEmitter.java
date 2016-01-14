@@ -56,14 +56,18 @@ public final class ServiceEmitter {
         Set<Class<?>> referencedClasses = getReferencedClasses(referencedTypes, settings);
         final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         referencedClasses = filterInputClasses(referencedClasses);
-
-        settingsToUse.customTypeProcessor = new TypeProcessor.Chain(new TypeProcessor() {
+        TypeProcessor discoveringProcessor = new TypeProcessor() {
             @Override
             public Result processType(Type javaType, Context context) {
                 discoveredTypes.add(javaType);
                 return null;
             }
-        }, baseTypeProcessor);
+        };
+
+        settingsToUse.customTypeProcessor = discoveringProcessor;
+        if (baseTypeProcessor != null) {
+            settingsToUse.customTypeProcessor = new TypeProcessor.Chain(discoveringProcessor, baseTypeProcessor);
+        }
 
         TypeScriptGenerator typescriptGenerator = new TypeScriptGenerator(settingsToUse);
         ByteArrayOutputStream typeDeclarations = new ByteArrayOutputStream();
@@ -79,9 +83,9 @@ public final class ServiceEmitter {
 
         writer.writeLine("");
         writer.writeLine("private httpApiBridge: IHttpApiBridge;");
-        writer.writeLine("constructor(restApiBridge: IHttpApiBridge) {");
+        writer.writeLine("constructor(httpApiBridge: IHttpApiBridge) {");
         writer.increaseIndent();
-        writer.writeLine("this.httpApiBridge = restApiBridge;");
+        writer.writeLine("this.httpApiBridge = httpApiBridge;");
         writer.decreaseIndent();
         writer.writeLine("}");
 
@@ -265,7 +269,7 @@ public final class ServiceEmitter {
             }
 
             // Don't add any classes that the user has made an exception for
-            if (settings.customTypeProcessor().processType(t, nullContext) == null) {
+            if (settings.customTypeProcessor() == null || settings.customTypeProcessor().processType(t, nullContext) == null) {
                 if (t instanceof Class) {
                     ret.add((Class<?>) t);
                 } else if(t instanceof ParameterizedType) {

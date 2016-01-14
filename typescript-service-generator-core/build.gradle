@@ -13,4 +13,8 @@ dependencies {
     compile "com.google.code.findbugs:annotations:${findbugsAnnotationsVersion}"
 
     processor "org.immutables:value:${immutablesVersion}"
+
+    testCompile "junit:junit:${junitVersion}"
+    testCompile "org.mockito:mockito-core:${mockitoVersion}"
+    testCompile "org.apache.commons:commons-lang3:${lang3Version}"
 }

@@ -3,5 +3,5 @@ apply plugin: "eclipse"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
-
