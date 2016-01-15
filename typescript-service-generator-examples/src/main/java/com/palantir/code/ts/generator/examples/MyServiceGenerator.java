@@ -7,19 +7,18 @@ import com.palantir.code.ts.generator.ServiceGenerator;
 
 public class MyServiceGenerator {
     public static void main(String[] args) {
-        String generatedFolderPath = "output";
+        String generatedFolderPath = "exampleTypescript/generated";
 
         String copyrightHeader = "// A potential copyright header";
         String generatedMessage = "// A desired generated message";
 
         ImmutableTypescriptServiceGeneratorConfiguration.Builder builder = ImmutableTypescriptServiceGeneratorConfiguration.builder();
         builder.copyrightHeader(copyrightHeader);
-        builder.typescriptModule("Foundry.Http");
+        builder.typescriptModule("MyProject.Http");
         builder.generatedMessage(generatedMessage);
         builder.generatedFolderLocation(new File(generatedFolderPath));
-        // HttpTypeWrapper is the type of whatever you want your endoint to return.
-        // For example in the case of angular this might be ng.IHttpPromise<%s>
-        builder.genericEndpointReturnType("HttpTypeWrapper<%s>");
+        // This example targets angular, angular $http returns ng.IPromise<%s> so we target that return type here
+        builder.genericEndpointReturnType("ng.IPromise<%s>");
 
         ServiceGenerator generator = new ServiceGenerator(builder.build());
         generator.generateTypescriptService(MyService.class);
