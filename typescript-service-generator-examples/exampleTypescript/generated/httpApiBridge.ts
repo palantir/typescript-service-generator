@@ -1,6 +1,6 @@
 // A potential copyright header
 // A desired generated message
-module Foundry.Http {
+module MyProject.Http {
 
     export interface IHttpEndpointOptions {
         serviceIdentifier?: string;
@@ -14,6 +14,6 @@ module Foundry.Http {
     }
 
     export interface IHttpApiBridge {
-        callEndpoint<T>(parameters: IHttpEndpointOptions): HttpTypeWrapper<T>;
+        callEndpoint<T>(parameters: IHttpEndpointOptions): ng.IPromise<T>;
     }
 }

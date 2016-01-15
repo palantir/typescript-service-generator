@@ -85,6 +85,4 @@ Instantiating the generated class requires an implementation of IHttpApiBridge
 
 IHttpApiBridge
 -----
-This is an interface that serves as a "bridge" between the generated typescript service classes. The contract of this interface is that it should know how to issue http calls given the inputs, and returns an object of a configurable type.
-
-TODO: hint at creating a bridge for angular
+This is an interface that serves as a "bridge" between the generated typescript service classes. The contract of this interface is that it should know how to issue http calls given the inputs, and returns an object of a configurable type (see TypescriptServiceGeneratorConfiguration.genericEndpointReturnType). Any generated service class can be instantiated by constructing it with an implementation of the httpApiBridge. For an example, see the end of output/angularHttpApiBridge.ts

@@ -1,20 +1,20 @@
 // A potential copyright header
 // A desired generated message
-module Foundry.Http.MyService {
+module MyProject.Http.MyService {
 
     export interface IMyObject {
         payload: string;
     }
 
     export interface IMyService {
-        helloWorld(): HttpTypeWrapper<IMyObject>;
+        helloWorld(): ng.IPromise<IMyObject>;
     }
 
     export class MyService implements IMyService {
 
         private httpApiBridge: IHttpApiBridge;
-        constructor(restApiBridge: IHttpApiBridge) {
-            this.httpApiBridge = restApiBridge;
+        constructor(httpApiBridge: IHttpApiBridge) {
+            this.httpApiBridge = httpApiBridge;
         }
 
         public helloWorld() {
