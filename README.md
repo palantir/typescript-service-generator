@@ -86,3 +86,11 @@ Instantiating the generated class requires an implementation of IHttpApiBridge
 IHttpApiBridge
 -----
 This is an interface that serves as a "bridge" between the generated typescript service classes. The contract of this interface is that it should know how to issue http calls given the inputs, and returns an object of a configurable type (see TypescriptServiceGeneratorConfiguration.genericEndpointReturnType). Any generated service class can be instantiated by constructing it with an implementation of the httpApiBridge. For an example, see the end of output/angularHttpApiBridge.ts
+
+Contributing
+-----
+- Write your code
+- Add tests for new functionality
+- Fill out the [Individual](https://github.com/palantir/typescript-service-generator/blob/master/Palantir_Individual_Contributor_License_Agreement.pdf?raw=true) or [Corporate](https://github.com/palantir/typescript-service-generator/blob/master/Palantir_Corporate_Contributor_License_Agreement.pdf?raw=true) Contributor License Agreement and send it to [opensource@palantir.com](mailto:opensource@palantir.com)
+  - You can do this easily on a Mac by using the Tools - Annotate - Signature feature in Preview.
+- Submit a pull request
