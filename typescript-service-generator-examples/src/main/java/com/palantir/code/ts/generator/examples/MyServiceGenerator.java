@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2016 Palantir Technologies Inc.
+ */
+
 package com.palantir.code.ts.generator.examples;
 
 import java.io.File;
