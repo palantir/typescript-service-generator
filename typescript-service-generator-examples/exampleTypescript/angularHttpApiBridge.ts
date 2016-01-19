@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2016 Palantir Technologies Inc.
+ */
+
 // An example http api bridge, intended to illustrate, not be used directly.
 module MyProject.Http {
 
