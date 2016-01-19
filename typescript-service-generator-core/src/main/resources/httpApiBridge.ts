@@ -1,4 +1,4 @@
-export interface IHttpEndpointOptions {
+export interface %sHttpEndpointOptions {
     serviceIdentifier?: string;
     endpointPath: string;
     method: string;
@@ -9,6 +9,6 @@ export interface IHttpEndpointOptions {
     data?: any;
 }
 
-export interface IHttpApiBridge {
-    callEndpoint<T>(parameters: IHttpEndpointOptions): %s;
+export interface %sHttpApiBridge {
+    callEndpoint<T>(parameters: %sHttpEndpointOptions): %s;
 }

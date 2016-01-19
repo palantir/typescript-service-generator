@@ -23,6 +23,7 @@ public class MyServiceGenerator {
         builder.generatedFolderLocation(new File(generatedFolderPath));
         // This example targets angular, angular $http returns ng.IPromise<%s> so we target that return type here
         builder.genericEndpointReturnType("ng.IPromise<%s>");
+        builder.generatedInterfacePrefix("I");
 
         ServiceGenerator generator = new ServiceGenerator(builder.build());
         generator.generateTypescriptService(MyService.class);

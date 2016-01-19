@@ -10,7 +10,7 @@ module MyProject.Http.MyService {
         helloWorld(): ng.IPromise<IMyObject>;
     }
 
-    export class MyService implements IMyService {
+    export class MyServiceImpl implements IMyService {
 
         private httpApiBridge: IHttpApiBridge;
         constructor(httpApiBridge: IHttpApiBridge) {

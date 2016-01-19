@@ -82,12 +82,13 @@ public final class ServiceEmitter {
 
     public void emitTypescriptClass() {
         writer.writeLine("");
-        writer.writeLine("export class " + model.name() + " implements " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
+        // Adding "Impl" ensures the class name is different from the impl name, which is a compilation requirement.
+        writer.writeLine("export class " + model.name() + "Impl" + " implements " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
         writer.increaseIndent();
 
         writer.writeLine("");
-        writer.writeLine("private httpApiBridge: IHttpApiBridge;");
-        writer.writeLine("constructor(httpApiBridge: IHttpApiBridge) {");
+        writer.writeLine(String.format("private httpApiBridge: %sHttpApiBridge;", settings.generatedInterfacePrefix()));
+        writer.writeLine(String.format("constructor(httpApiBridge: %sHttpApiBridge) {", settings.generatedInterfacePrefix()));
         writer.increaseIndent();
         writer.writeLine("this.httpApiBridge = httpApiBridge;");
         writer.decreaseIndent();
@@ -100,7 +101,7 @@ public final class ServiceEmitter {
             line += ") {";
             writer.writeLine(line);
             writer.increaseIndent();
-            writer.writeLine("var httpCallData = <IHttpEndpointOptions> {");
+            writer.writeLine(String.format("var httpCallData = <%sHttpEndpointOptions> {", settings.generatedInterfacePrefix()));
             writer.increaseIndent();
             writer.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
             writer.writeLine("endpointPath: \"" + getEndpointPathString(model, endpointModel) + "\",");
