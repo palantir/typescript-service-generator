@@ -96,6 +96,14 @@ public abstract class TypescriptServiceGeneratorConfiguration {
     @Value.Parameter
     public abstract File generatedFolderLocation();
 
+    /**
+     * The prefix to put before all generated interfaces.
+     */
+    @Value.Default
+    public String generatedInterfacePrefix() {
+        return "";
+    }
+
     public TypeProcessor getOverridingTypeParser() {
         TypeProcessor defaultTypeProcessor = new TypeProcessor() {
             @Override
@@ -133,7 +141,7 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         typeProcessors.add(getOverridingTypeParser());
         typeProcessors.add(genericTypeProcessor);
         settings.customTypeProcessor = new TypeProcessor.Chain(typeProcessors);
-        settings.addTypeNamePrefix = "I";
+        settings.addTypeNamePrefix = generatedInterfacePrefix();
         settings.sortDeclarations = true;
         settings.noFileComment = true;
 

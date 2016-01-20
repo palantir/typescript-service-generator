@@ -20,7 +20,7 @@ module ModuleName.TestComplexServiceClass {
         simplePut(dataObject: IDataObject): FooReturn<string>;
     }
 
-    export class TestComplexServiceClass implements ITestComplexServiceClass {
+    export class TestComplexServiceClassImpl implements ITestComplexServiceClass {
 
         private httpApiBridge: IHttpApiBridge;
         constructor(httpApiBridge: IHttpApiBridge) {

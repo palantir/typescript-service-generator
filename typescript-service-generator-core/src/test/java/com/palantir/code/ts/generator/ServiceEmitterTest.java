@@ -47,16 +47,16 @@ public class ServiceEmitterTest {
         writer.close();
         String expectedOutput = "" +
 "\n" +
-"    export interface IDataObject {\n" +
-"        y: IMyObject;\n" +
+"    export interface DataObject {\n" +
+"        y: MyObject;\n" +
 "    }\n" +
 "\n" +
-"    export interface IGenericObject<T> {\n" +
+"    export interface GenericObject<T> {\n" +
 "        y: T;\n" +
 "    }\n" +
 "\n" +
-"    export interface IMyObject {\n" +
-"        y: IMyObject;\n" +
+"    export interface MyObject {\n" +
+"        y: MyObject;\n" +
 "    }\n" +
 "";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
@@ -69,10 +69,10 @@ public class ServiceEmitterTest {
         serviceEmitter.emitTypescriptInterface();
         writer.close();
         String expectedOutput = "\n" +
-"export interface ITestComplexServiceClass {\n" +
-"    allOptionsPost(a: string, dataObject: IDataObject, x?: number): FooType<IGenericObject<IMyObject>>;\n" +
-"    queryGetter(x?: boolean): FooType<IMyObject>;\n" +
-"    simplePut(dataObject: IDataObject): FooType<string>;\n" +
+"export interface TestComplexServiceClass {\n" +
+"    allOptionsPost(a: string, dataObject: DataObject, x?: number): FooType<GenericObject<MyObject>>;\n" +
+"    queryGetter(x?: boolean): FooType<MyObject>;\n" +
+"    simplePut(dataObject: DataObject): FooType<string>;\n" +
 "}\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
@@ -84,15 +84,15 @@ public class ServiceEmitterTest {
         serviceEmitter.emitTypescriptClass();
         writer.close();
         String expectedOutput = "\n" +
-"export class TestComplexServiceClass implements ITestComplexServiceClass {\n" +
+"export class TestComplexServiceClassImpl implements TestComplexServiceClass {\n" +
 "\n" +
-"    private httpApiBridge: IHttpApiBridge;\n" +
-"    constructor(httpApiBridge: IHttpApiBridge) {\n" +
+"    private httpApiBridge: HttpApiBridge;\n" +
+"    constructor(httpApiBridge: HttpApiBridge) {\n" +
 "        this.httpApiBridge = httpApiBridge;\n" +
 "    }\n" +
 "\n" +
-"    public allOptionsPost(a: string, dataObject: IDataObject, x?: number) {\n" +
-"        var httpCallData = <IHttpEndpointOptions> {\n" +
+"    public allOptionsPost(a: string, dataObject: DataObject, x?: number) {\n" +
+"        var httpCallData = <HttpEndpointOptions> {\n" +
 "            serviceIdentifier: \"testComplexServiceClass\",\n" +
 "            endpointPath: \"testComplexService/allOptionsPost/{a}\",\n" +
 "            method: \"POST\",\n" +
@@ -104,11 +104,11 @@ public class ServiceEmitterTest {
 "            },\n" +
 "            data: dataObject\n" +
 "        };\n" +
-"        return this.httpApiBridge.callEndpoint<IGenericObject<IMyObject>>(httpCallData);\n" +
+"        return this.httpApiBridge.callEndpoint<GenericObject<MyObject>>(httpCallData);\n" +
 "    }\n" +
 "\n" +
 "    public queryGetter(x?: boolean) {\n" +
-"        var httpCallData = <IHttpEndpointOptions> {\n" +
+"        var httpCallData = <HttpEndpointOptions> {\n" +
 "            serviceIdentifier: \"testComplexServiceClass\",\n" +
 "            endpointPath: \"testComplexService/queryGetter\",\n" +
 "            method: \"GET\",\n" +
@@ -120,11 +120,11 @@ public class ServiceEmitterTest {
 "            },\n" +
 "            data: null\n" +
 "        };\n" +
-"        return this.httpApiBridge.callEndpoint<IMyObject>(httpCallData);\n" +
+"        return this.httpApiBridge.callEndpoint<MyObject>(httpCallData);\n" +
 "    }\n" +
 "\n" +
-"    public simplePut(dataObject: IDataObject) {\n" +
-"        var httpCallData = <IHttpEndpointOptions> {\n" +
+"    public simplePut(dataObject: DataObject) {\n" +
+"        var httpCallData = <HttpEndpointOptions> {\n" +
 "            serviceIdentifier: \"testComplexServiceClass\",\n" +
 "            endpointPath: \"testComplexService/simplePut\",\n" +
 "            method: \"PUT\",\n" +

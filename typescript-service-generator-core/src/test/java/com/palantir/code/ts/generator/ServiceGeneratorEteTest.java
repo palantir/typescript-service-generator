@@ -31,6 +31,7 @@ public class ServiceGeneratorEteTest {
                                                                                                                   .generatedMessage("// Generated")
                                                                                                                   .generatedFolderLocation(actualDirectory)
                                                                                                                   .genericEndpointReturnType("FooReturn<%s>")
+                                                                                                                  .generatedInterfacePrefix("I")
                                                                                                                   .typescriptModule("ModuleName")
                                                                                                                   .build();
         ServiceGenerator serviceGenerator = new ServiceGenerator(config);
