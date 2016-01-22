@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import cz.habarta.typescript.generator.GenericsTypeProcessor;
+import cz.habarta.typescript.generator.JsonLibrary;
 import cz.habarta.typescript.generator.Settings;
 import cz.habarta.typescript.generator.TsType;
 import cz.habarta.typescript.generator.TypeProcessor;
@@ -144,6 +145,7 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.addTypeNamePrefix = generatedInterfacePrefix();
         settings.sortDeclarations = true;
         settings.noFileComment = true;
+        settings.jsonLibrary = JsonLibrary.jackson2;
 
         return settings;
     }
