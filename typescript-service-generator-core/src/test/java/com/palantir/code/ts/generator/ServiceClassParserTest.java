@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointModel;
@@ -28,6 +29,7 @@ import com.palantir.code.ts.generator.utils.TestUtils.DataObject;
 import com.palantir.code.ts.generator.utils.TestUtils.GenericObject;
 import com.palantir.code.ts.generator.utils.TestUtils.IgnoredParametersClass;
 import com.palantir.code.ts.generator.utils.TestUtils.MyObject;
+import com.palantir.code.ts.generator.utils.TestUtils.MyValue;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
 import com.palantir.code.ts.generator.utils.TestUtils.TestServiceClass;
 
@@ -50,7 +52,7 @@ public class ServiceClassParserTest {
     @Test
     public void parseSimpleClassTest() {
         ServiceModel model = serviceClassParser.parseServiceClass(TestServiceClass.class, settings);
-        assertEquals(Sets.newHashSet((Type) String.class), model.referencedTypes());
+        assertEquals(ImmutableSet.of(MyValue.class, String.class), model.referencedTypes());
         assertEquals("TestServiceClass", model.name());
         assertEquals("testService", model.servicePath());
         ServiceEndpointParameterModel aParam = ImmutableServiceEndpointParameterModel.builder().pathParam("a").javaType(String.class).tsType(TsType.String).build();
@@ -63,7 +65,18 @@ public class ServiceClassParserTest {
                                                                                                .endpointPath("stringGetter/{a}/{b}")
                                                                                                .endpointMethodType("GET")
                                                                                                .build();
-        assertEquals(model.endpointModels(), Lists.newArrayList(stringGetterEndpointModel));
+        ImmutableServiceEndpointModel valueGetterEndpointModel = ImmutableServiceEndpointModel.builder()
+                                                                                               .javaReturnType(MyValue.class)
+                                                                                               .tsReturnType(new TsType.StructuralType("MyValue"))
+                                                                                               .endpointName("value")
+                                                                                               .endpointPath("value")
+                                                                                               .endpointMethodType("GET")
+                                                                                               .build();
+
+        // comparing as strings to get around the fact that TsTypes don't define equals()
+        assertEquals(stringGetterEndpointModel.toString(), model.endpointModels().get(0).toString());
+        assertEquals(valueGetterEndpointModel.toString(), model.endpointModels().get(1).toString());
+        assertEquals(2, model.endpointModels().size());
     }
 
     @Test
