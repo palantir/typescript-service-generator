@@ -10,14 +10,18 @@ module ModuleName.TestComplexServiceClass {
         y: T;
     }
 
+    export interface IImmutablesObject {
+        y: string;
+    }
+
     export interface IMyObject {
         y: IMyObject;
     }
 
     export interface ITestComplexServiceClass {
-        allOptionsPost(a: string, dataObject: IDataObject, x?: number): FooReturn<IGenericObject<IMyObject>>;
+        allOptionsPost(a: string, dataObject: IDataObject, b?: number): FooReturn<IGenericObject<IMyObject>>;
         queryGetter(x?: boolean): FooReturn<IMyObject>;
-        simplePut(dataObject: IDataObject): FooReturn<string>;
+        simplePut(dataObject: IDataObject): FooReturn<IImmutablesObject>;
     }
 
     export class TestComplexServiceClassImpl implements ITestComplexServiceClass {
@@ -27,7 +31,7 @@ module ModuleName.TestComplexServiceClass {
             this.httpApiBridge = httpApiBridge;
         }
 
-        public allOptionsPost(a: string, dataObject: IDataObject, x?: number) {
+        public allOptionsPost(a: string, dataObject: IDataObject, b?: number) {
             var httpCallData = <IHttpEndpointOptions> {
                 serviceIdentifier: "testComplexServiceClass",
                 endpointPath: "testComplexService/allOptionsPost/{a}",
@@ -36,7 +40,7 @@ module ModuleName.TestComplexServiceClass {
                 requiredHeaders: [],
                 pathArguments: [a],
                 queryArguments: {
-                    x: x,
+                    b: b,
                 },
                 data: dataObject
             };
@@ -71,7 +75,7 @@ module ModuleName.TestComplexServiceClass {
                 },
                 data: dataObject
             };
-            return this.httpApiBridge.callEndpoint<string>(httpCallData);
+            return this.httpApiBridge.callEndpoint<IImmutablesObject>(httpCallData);
         }
     }
 }

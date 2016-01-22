@@ -55,6 +55,10 @@ public class ServiceEmitterTest {
 "        y: T;\n" +
 "    }\n" +
 "\n" +
+"    export interface ImmutablesObject {\n" +
+"        y: string;\n" +
+"    }\n" +
+"\n" +
 "    export interface MyObject {\n" +
 "        y: MyObject;\n" +
 "    }\n" +
@@ -70,9 +74,9 @@ public class ServiceEmitterTest {
         writer.close();
         String expectedOutput = "\n" +
 "export interface TestComplexServiceClass {\n" +
-"    allOptionsPost(a: string, dataObject: DataObject, x?: number): FooType<GenericObject<MyObject>>;\n" +
+"    allOptionsPost(a: string, dataObject: DataObject, b?: number): FooType<GenericObject<MyObject>>;\n" +
 "    queryGetter(x?: boolean): FooType<MyObject>;\n" +
-"    simplePut(dataObject: DataObject): FooType<string>;\n" +
+"    simplePut(dataObject: DataObject): FooType<ImmutablesObject>;\n" +
 "}\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
@@ -91,7 +95,7 @@ public class ServiceEmitterTest {
 "        this.httpApiBridge = httpApiBridge;\n" +
 "    }\n" +
 "\n" +
-"    public allOptionsPost(a: string, dataObject: DataObject, x?: number) {\n" +
+"    public allOptionsPost(a: string, dataObject: DataObject, b?: number) {\n" +
 "        var httpCallData = <HttpEndpointOptions> {\n" +
 "            serviceIdentifier: \"testComplexServiceClass\",\n" +
 "            endpointPath: \"testComplexService/allOptionsPost/{a}\",\n" +
@@ -100,7 +104,7 @@ public class ServiceEmitterTest {
 "            requiredHeaders: [],\n" +
 "            pathArguments: [a],\n" +
 "            queryArguments: {\n" +
-"                x: x,\n" +
+"                b: b,\n" +
 "            },\n" +
 "            data: dataObject\n" +
 "        };\n" +
@@ -135,7 +139,7 @@ public class ServiceEmitterTest {
 "            },\n" +
 "            data: dataObject\n" +
 "        };\n" +
-"        return this.httpApiBridge.callEndpoint<string>(httpCallData);\n" +
+"        return this.httpApiBridge.callEndpoint<ImmutablesObject>(httpCallData);\n" +
 "    }\n" +
 "}\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));

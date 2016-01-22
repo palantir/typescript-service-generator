@@ -12,6 +12,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 public class TestUtils {
 
     @Path("/testService")
@@ -31,11 +37,11 @@ public class TestUtils {
 
         @PUT
         @Path("simplePut")
-        String simplePut(DataObject dataObject);
+        ImmutablesObject simplePut(DataObject dataObject);
 
         @POST
         @Path("/allOptionsPost/{a}")
-        GenericObject<MyObject> allOptionsPost(@PathParam("a") String a, @QueryParam("x") Integer b, DataObject dataObject);
+        GenericObject<MyObject> allOptionsPost(@PathParam("a") String a, @QueryParam("b") Integer x, DataObject dataObject);
     }
 
     @Path("/ignoredParameters")
@@ -47,7 +53,9 @@ public class TestUtils {
     }
 
     public static class MyObject {
-        public MyObject getY() {
+        // Ensure json property overrides
+        @JsonProperty("y")
+        public MyObject getZ() {
             return null;
         }
     }
@@ -62,5 +70,12 @@ public class TestUtils {
         public T getY() {
             return null;
         }
+    }
+
+    @JsonDeserialize(as = ImmutableImmutablesObject.class)
+    @JsonSerialize(as = ImmutableImmutablesObject.class)
+    @Value.Immutable
+    public interface ImmutablesObject {
+        String y();
     }
 }
