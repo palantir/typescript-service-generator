@@ -10,8 +10,13 @@ import java.util.Set;
 
 import org.immutables.value.Value;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
+@JsonDeserialize(as = ImmutableServiceModel.class)
+@JsonSerialize(as = ImmutableServiceModel.class)
 public abstract class ServiceModel {
     public abstract Set<Type> referencedTypes();
     public abstract String name();

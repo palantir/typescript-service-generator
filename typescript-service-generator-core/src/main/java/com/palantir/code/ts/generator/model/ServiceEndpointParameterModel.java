@@ -11,10 +11,15 @@ import javax.annotation.Nullable;
 
 import org.immutables.value.Value;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import cz.habarta.typescript.generator.TsType;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
+@JsonDeserialize(as = ImmutableServiceEndpointParameterModel.class)
+@JsonSerialize(as = ImmutableServiceEndpointParameterModel.class)
 public abstract class ServiceEndpointParameterModel {
     @Nullable public abstract String pathParam();
     @Nullable public abstract String headerParam();
