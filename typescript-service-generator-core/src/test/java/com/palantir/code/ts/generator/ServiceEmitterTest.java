@@ -100,6 +100,7 @@ public class ServiceEmitterTest {
 "        var httpCallData = <HttpEndpointOptions> {\n" +
 "            serviceIdentifier: \"testComplexServiceClass\",\n" +
 "            endpointPath: \"testComplexService/allOptionsPost/{a}\",\n" +
+"            endpointName: \"allOptionsPost\",\n" +
 "            method: \"POST\",\n" +
 "            mediaType: \"application/json\",\n" +
 "            requiredHeaders: [],\n" +
@@ -116,6 +117,7 @@ public class ServiceEmitterTest {
 "        var httpCallData = <HttpEndpointOptions> {\n" +
 "            serviceIdentifier: \"testComplexServiceClass\",\n" +
 "            endpointPath: \"testComplexService/queryGetter\",\n" +
+"            endpointName: \"queryGetter\",\n" +
 "            method: \"GET\",\n" +
 "            mediaType: \"application/json\",\n" +
 "            requiredHeaders: [],\n" +
@@ -132,6 +134,7 @@ public class ServiceEmitterTest {
 "        var httpCallData = <HttpEndpointOptions> {\n" +
 "            serviceIdentifier: \"testComplexServiceClass\",\n" +
 "            endpointPath: \"testComplexService/simplePut\",\n" +
+"            endpointName: \"simplePut\",\n" +
 "            method: \"PUT\",\n" +
 "            mediaType: \"application/json\",\n" +
 "            requiredHeaders: [],\n" +

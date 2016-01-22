@@ -1,6 +1,7 @@
 export interface %sHttpEndpointOptions {
     serviceIdentifier?: string;
     endpointPath: string;
+    endpointName: string;
     method: string;
     mediaType: string;
     requiredHeaders: string[];

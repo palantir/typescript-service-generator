@@ -105,6 +105,7 @@ public final class ServiceEmitter {
             writer.increaseIndent();
             writer.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
             writer.writeLine("endpointPath: \"" + getEndpointPathString(model, endpointModel) + "\",");
+            writer.writeLine("endpointName: \"" + endpointModel.endpointName() + "\",");
             writer.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
             writer.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
             List<String> requiredHeaders = Lists.newArrayList();
