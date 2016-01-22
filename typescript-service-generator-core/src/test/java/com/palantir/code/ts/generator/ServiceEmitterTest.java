@@ -63,6 +63,7 @@ public class ServiceEmitterTest {
 "        y: MyObject;\n" +
 "    }\n" +
 "";
+        System.out.println(new String(stream.toByteArray()));
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 

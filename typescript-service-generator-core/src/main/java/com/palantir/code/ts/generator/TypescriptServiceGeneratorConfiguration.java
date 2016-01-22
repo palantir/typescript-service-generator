@@ -15,17 +15,22 @@ import java.util.Set;
 
 import org.immutables.value.Value;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import cz.habarta.typescript.generator.GenericsTypeProcessor;
+import cz.habarta.typescript.generator.JsonLibrary;
 import cz.habarta.typescript.generator.Settings;
 import cz.habarta.typescript.generator.TsType;
 import cz.habarta.typescript.generator.TypeProcessor;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
+@JsonDeserialize(as = ImmutableTypescriptServiceGeneratorConfiguration.class)
+@JsonSerialize(as = ImmutableTypescriptServiceGeneratorConfiguration.class)
 public abstract class TypescriptServiceGeneratorConfiguration {
 
     /**
@@ -144,6 +149,7 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.addTypeNamePrefix = generatedInterfacePrefix();
         settings.sortDeclarations = true;
         settings.noFileComment = true;
+        settings.jsonLibrary = JsonLibrary.jackson2;
 
         return settings;
     }

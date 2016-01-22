@@ -9,10 +9,16 @@ import java.util.List;
 
 import org.immutables.value.Value;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.code.ts.generator.ImmutableTypescriptServiceGeneratorConfiguration;
+
 import cz.habarta.typescript.generator.TsType;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
+@JsonDeserialize(as = ImmutableTypescriptServiceGeneratorConfiguration.class)
+@JsonSerialize(as = ImmutableTypescriptServiceGeneratorConfiguration.class)
 public abstract class ServiceEndpointModel implements Comparable<ServiceEndpointModel> {
     public abstract Type javaReturnType();
     public abstract TsType tsReturnType();
