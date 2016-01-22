@@ -35,6 +35,7 @@ module ModuleName.TestComplexServiceClass {
             var httpCallData = <IHttpEndpointOptions> {
                 serviceIdentifier: "testComplexServiceClass",
                 endpointPath: "testComplexService/allOptionsPost/{a}",
+                endpointName: "allOptionsPost",
                 method: "POST",
                 mediaType: "application/json",
                 requiredHeaders: [],
@@ -51,6 +52,7 @@ module ModuleName.TestComplexServiceClass {
             var httpCallData = <IHttpEndpointOptions> {
                 serviceIdentifier: "testComplexServiceClass",
                 endpointPath: "testComplexService/queryGetter",
+                endpointName: "queryGetter",
                 method: "GET",
                 mediaType: "application/json",
                 requiredHeaders: [],
@@ -67,6 +69,7 @@ module ModuleName.TestComplexServiceClass {
             var httpCallData = <IHttpEndpointOptions> {
                 serviceIdentifier: "testComplexServiceClass",
                 endpointPath: "testComplexService/simplePut",
+                endpointName: "simplePut",
                 method: "PUT",
                 mediaType: "application/json",
                 requiredHeaders: [],

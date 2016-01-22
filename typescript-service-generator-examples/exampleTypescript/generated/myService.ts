@@ -27,6 +27,7 @@ module MyProject.Http.MyService {
             var httpCallData = <IHttpEndpointOptions> {
                 serviceIdentifier: "myService",
                 endpointPath: "myservice/foo_get",
+                endpointName: "helloWorld",
                 method: "GET",
                 mediaType: "application/json",
                 requiredHeaders: [],
@@ -42,6 +43,7 @@ module MyProject.Http.MyService {
             var httpCallData = <IHttpEndpointOptions> {
                 serviceIdentifier: "myService",
                 endpointPath: "myservice/planets",
+                endpointName: "planets",
                 method: "GET",
                 mediaType: "application/json",
                 requiredHeaders: [],
