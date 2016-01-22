@@ -6,8 +6,14 @@ module MyProject.Http.MyService {
         payload: string;
     }
 
+    export interface IPlanet {
+        name: string;
+        radiusKm: number;
+    }
+
     export interface IMyService {
         helloWorld(): ng.IPromise<IMyObject>;
+        planets(): ng.IPromise<IPlanet[]>;
     }
 
     export class MyServiceImpl implements IMyService {
@@ -30,6 +36,21 @@ module MyProject.Http.MyService {
                 data: null
             };
             return this.httpApiBridge.callEndpoint<IMyObject>(httpCallData);
+        }
+
+        public planets() {
+            var httpCallData = <IHttpEndpointOptions> {
+                serviceIdentifier: "myService",
+                endpointPath: "myservice/planets",
+                method: "GET",
+                mediaType: "application/json",
+                requiredHeaders: [],
+                pathArguments: [],
+                queryArguments: {
+                },
+                data: null
+            };
+            return this.httpApiBridge.callEndpoint<IPlanet[]>(httpCallData);
         }
     }
 }
