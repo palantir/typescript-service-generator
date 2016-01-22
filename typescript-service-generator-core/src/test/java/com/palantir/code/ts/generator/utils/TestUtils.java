@@ -12,6 +12,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.immutables.value.Value;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 public class TestUtils {
 
     @Path("/testService")
@@ -20,6 +25,10 @@ public class TestUtils {
         @GET
         @Path("/stringGetter/{a}/{b}")
         String stringGetter(@PathParam("a") String a, @PathParam("b") String b);
+
+        @GET
+        @Path("/value")
+        MyValue value();
     }
 
     @Path("/testComplexService")
@@ -62,5 +71,12 @@ public class TestUtils {
         public T getY() {
             return null;
         }
+    }
+
+    @JsonDeserialize(as = ImmutableMyValue.class)
+    @JsonSerialize(as = ImmutableMyValue.class)
+    @Value.Immutable
+    public interface MyValue {
+        String z();
     }
 }
