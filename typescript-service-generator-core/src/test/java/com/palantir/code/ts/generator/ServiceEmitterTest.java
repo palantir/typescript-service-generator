@@ -13,11 +13,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.palantir.code.ts.generator.model.ServiceModel;
+import com.palantir.code.ts.generator.utils.TestUtils.DuplicateMethodNamesService;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
 
 public class ServiceEmitterTest {
 
-    private ServiceEmitter emitter;
     private TypescriptServiceGeneratorConfiguration settings;
     private IndentedOutputWriter writer;
     private ByteArrayOutputStream stream;
@@ -63,7 +63,6 @@ public class ServiceEmitterTest {
 "        y: MyObject;\n" +
 "    }\n" +
 "";
-        System.out.println(new String(stream.toByteArray()));
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 
@@ -144,6 +143,36 @@ public class ServiceEmitterTest {
 "            data: dataObject\n" +
 "        };\n" +
 "        return this.httpApiBridge.callEndpoint<ImmutablesObject>(httpCallData);\n" +
+"    }\n" +
+"}\n";
+        assertEquals(expectedOutput, new String(stream.toByteArray()));
+    }
+
+    @Test
+    public void testDuplicateMethodInterface() {
+        ServiceModel model = serviceClassParser.parseServiceClass(DuplicateMethodNamesService.class, settings);
+        ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
+        serviceEmitter.emitTypescriptInterface();
+        writer.close();
+        String expectedOutput = "\n" +
+"export interface DuplicateMethodNamesService {\n" +
+"    // WARNING: not creating method declaration, java service has multiple methods with the name duplicate\n" +
+"}\n";
+        assertEquals(expectedOutput, new String(stream.toByteArray()));
+    }
+
+    @Test
+    public void testDuplicateMethodClass() {
+        ServiceModel model = serviceClassParser.parseServiceClass(DuplicateMethodNamesService.class, settings);
+        ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
+        serviceEmitter.emitTypescriptClass();
+        writer.close();
+        String expectedOutput = "\n" +
+"export class DuplicateMethodNamesServiceImpl implements DuplicateMethodNamesService {\n" +
+"\n" +
+"    private httpApiBridge: HttpApiBridge;\n" +
+"    constructor(httpApiBridge: HttpApiBridge) {\n" +
+"        this.httpApiBridge = httpApiBridge;\n" +
 "    }\n" +
 "}\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));

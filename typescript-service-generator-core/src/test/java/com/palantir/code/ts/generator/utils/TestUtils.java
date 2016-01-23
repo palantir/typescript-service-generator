@@ -52,6 +52,18 @@ public class TestUtils {
         String stringGetter(@CheckForNull Integer y, @PathParam("a") String a, @PathParam("b") String b);
     }
 
+    @Path("/duplicateMethods")
+    public interface DuplicateMethodNamesService {
+
+        @GET
+        @Path("/duplicate")
+        String duplicate();
+
+        @GET
+        @Path("/duplicate/{a}")
+        String duplicate(@PathParam("a") String a);
+    }
+
     public static class MyObject {
         // Ensure json property overrides
         @JsonProperty("y")
