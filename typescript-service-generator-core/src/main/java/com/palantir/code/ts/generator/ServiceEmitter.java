@@ -81,6 +81,7 @@ public final class ServiceEmitter {
     }
 
     public void emitTypescriptClass() {
+        Set<String> duplicateEndpointNames = getDuplicateEndpointNames();
         writer.writeLine("");
         // Adding "Impl" ensures the class name is different from the impl name, which is a compilation requirement.
         writer.writeLine("export class " + model.name() + "Impl" + " implements " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
@@ -95,6 +96,10 @@ public final class ServiceEmitter {
         writer.writeLine("}");
 
         for (ServiceEndpointModel endpointModel: model.endpointModels()) {
+            if (duplicateEndpointNames.contains(endpointModel.endpointName())) {
+                // don't output any duplicates
+                continue;
+            }
             writer.writeLine("");
             String line = "public " + endpointModel.endpointName() + "(";
             line += getEndpointParametersString(endpointModel);
@@ -151,19 +156,38 @@ public final class ServiceEmitter {
     }
 
     public void emitTypescriptInterface() {
+        Set<String> duplicateEndpointNames = getDuplicateEndpointNames();
         writer.writeLine("");
         writer.writeLine("export interface " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
         writer.increaseIndent();
 
         for (ServiceEndpointModel endpointModel: model.endpointModels()) {
-            String line = endpointModel.endpointName() + "(";
-            line += getEndpointParametersString(endpointModel);
-            line += String.format("): " + settings.genericEndpointReturnType(), endpointModel.tsReturnType().toString()) + ";";
-            writer.writeLine(line);
+            if (!duplicateEndpointNames.contains(endpointModel.endpointName())) {
+                String line = endpointModel.endpointName() + "(";
+                line += getEndpointParametersString(endpointModel);
+                line += String.format("): " + settings.genericEndpointReturnType(), endpointModel.tsReturnType().toString()) + ";";
+                writer.writeLine(line);
+            }
+        }
+        for (String endpointName : duplicateEndpointNames) {
+            writer.writeLine(String.format("// WARNING: not creating method declaration, java service has multiple methods with the name %s", endpointName));
         }
 
         writer.decreaseIndent();
         writer.writeLine("}");
+    }
+
+    private Set<String> getDuplicateEndpointNames() {
+        Set<String> seenEndpointNames = Sets.newHashSet();
+        Set<String> duplicateEndpointNames = Sets.newHashSet();
+        model.endpointModels().stream().forEach(model -> {
+            String endpointName = model.endpointName();
+            if (seenEndpointNames.contains(endpointName)) {
+                duplicateEndpointNames.add(endpointName);
+            }
+            seenEndpointNames.add(endpointName);
+        });
+        return duplicateEndpointNames;
     }
 
     private String getEndpointPathString(ServiceModel model, ServiceEndpointModel endpointModel) {
@@ -287,5 +311,4 @@ public final class ServiceEmitter {
         }
         return ret;
     }
-
 }
