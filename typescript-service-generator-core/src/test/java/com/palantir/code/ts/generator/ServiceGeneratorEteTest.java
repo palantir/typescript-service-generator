@@ -10,6 +10,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
@@ -46,6 +47,8 @@ public class ServiceGeneratorEteTest {
         if (a.isDirectory()) {
             File[] aFiles = a.listFiles();
             File[] bFiles = b.listFiles();
+            Arrays.sort(aFiles);
+            Arrays.sort(bFiles);
             if (aFiles.length != bFiles.length) fail();
             for (int i = 0; i < aFiles.length; i++) {
                 assertDirectoriesEqual(aFiles[i], bFiles[i]);

@@ -5,7 +5,7 @@ export interface %sHttpEndpointOptions {
     method: string;
     mediaType: string;
     requiredHeaders: string[];
-    pathArguments: string[];
+    pathArguments: any[];
     queryArguments: any;
     data?: any;
 }
