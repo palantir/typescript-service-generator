@@ -64,6 +64,15 @@ public class TestUtils {
         String duplicate(@PathParam("a") String a);
     }
 
+    @Path("/concreteObject")
+    public class ConcreteObjectService {
+
+        @GET
+        public String noPathGetter() {
+            return "";
+        };
+    }
+
     public static class MyObject {
         // Ensure json property overrides
         @JsonProperty("y")

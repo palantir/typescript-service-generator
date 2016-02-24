@@ -24,6 +24,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.apache.commons.lang3.reflect.MethodUtils;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -42,6 +44,18 @@ import cz.habarta.typescript.generator.TypeScriptGenerator;
 
 
 public final class ServiceClassParser {
+    @SuppressWarnings("unchecked")
+    private final static List<Class<? extends Annotation>> ANNOTATION_CLASSES = Lists.newArrayList(POST.class, GET.class, DELETE.class, PUT.class, OPTIONS.class);
+    
+    public Set<Method> getAllServiceMethods(Class<?> serviceClass) {
+        Set<Method> serviceMethods = Sets.newHashSet();
+        for (Class<? extends Annotation> annotation : ANNOTATION_CLASSES) {
+            for (Method method : MethodUtils.getMethodsListWithAnnotation(serviceClass, annotation)) {
+                serviceMethods.add(method);
+            }
+        }
+        return serviceMethods;
+    }
 
     public ServiceModel parseServiceClass(Class<?> serviceClass, TypescriptServiceGeneratorConfiguration settings) {
         ImmutableServiceModel.Builder serviceModel = ImmutableServiceModel.builder();
@@ -49,9 +63,10 @@ public final class ServiceClassParser {
         serviceModel.servicePath(PathUtils.trimSlashes(servicePathAnnotation.value()));
         serviceModel.name(serviceClass.getSimpleName());
 
+        Set<Method> serviceMethods = getAllServiceMethods(serviceClass);
         // find and stores all types that are referenced by this service
         Set<Type> referencedTypes = Sets.newHashSet();
-        for (Method method : serviceClass.getMethods()) {
+        for (Method method : serviceMethods) {
             referencedTypes.addAll(getTypesFromEndpoint(method, settings));
         }
         serviceModel.referencedTypes(referencedTypes);
@@ -59,7 +74,7 @@ public final class ServiceClassParser {
         ModelCompiler compiler = new TypeScriptGenerator(settings.getSettings()).getModelCompiler();
 
         List<ServiceEndpointModel> endpointModels = Lists.newArrayList();
-        for (Method method : serviceClass.getMethods()) {
+        for (Method method : serviceMethods) {
             endpointModels.add(computeEndpointModel(method, compiler, settings));
         }
         Collections.sort(endpointModels);
@@ -73,7 +88,12 @@ public final class ServiceClassParser {
         ret.javaReturnType(endpoint.getGenericReturnType());
         ret.tsReturnType(compiler.typeFromJavaWithReplacement(endpoint.getGenericReturnType()));
         ret.endpointMethodType(getMethodType(endpoint));
-        ret.endpointPath(PathUtils.trimSlashes(endpoint.getAnnotation(Path.class).value()));
+
+        String annotationValue = "";
+        if (endpoint.getAnnotation(Path.class) != null) {
+            annotationValue = endpoint.getAnnotation(Path.class).value();
+        }
+        ret.endpointPath(PathUtils.trimSlashes(annotationValue));
         Consumes consumes = endpoint.getAnnotation(Consumes.class);
         if (consumes != null) {
             if (consumes.value().length > 1) {
@@ -125,9 +145,7 @@ public final class ServiceClassParser {
     }
 
     private static String getMethodType(Method endpoint) {
-        @SuppressWarnings("unchecked")
-        List<Class<? extends Annotation>> annotationClasses = Lists.newArrayList(POST.class, GET.class, DELETE.class, PUT.class, OPTIONS.class);
-        for (Class<? extends Annotation> annotationClass : annotationClasses) {
+        for (Class<? extends Annotation> annotationClass : ANNOTATION_CLASSES) {
             if (endpoint.getAnnotation(annotationClass) != null) {
                 return annotationClass.getSimpleName();
             }
