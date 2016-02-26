@@ -81,7 +81,10 @@ public final class ServiceEmitter {
     }
 
     public void emitTypescriptClass() {
-        Set<String> duplicateEndpointNames = getDuplicateEndpointNames();
+        Set<String> endpointsToWarnAboutDuplicateNames = Sets.newHashSet();
+        if (!this.settings.emitDuplicateJavaMethodNames()) {
+            endpointsToWarnAboutDuplicateNames = getDuplicateEndpointNames();
+        }
         writer.writeLine("");
         // Adding "Impl" ensures the class name is different from the impl name, which is a compilation requirement.
         writer.writeLine("export class " + model.name() + "Impl" + " implements " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
@@ -96,7 +99,7 @@ public final class ServiceEmitter {
         writer.writeLine("}");
 
         for (ServiceEndpointModel endpointModel: model.endpointModels()) {
-            if (duplicateEndpointNames.contains(endpointModel.endpointName())) {
+            if (endpointsToWarnAboutDuplicateNames.contains(endpointModel.endpointName())) {
                 // don't output any duplicates
                 continue;
             }
