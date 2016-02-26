@@ -56,6 +56,15 @@ public abstract class TypescriptServiceGeneratorConfiguration {
     }
 
     /**
+     * If true, emit method signatures even when it would create duplicate java names (results in typescript that does not compile).
+     * If faslse, emit a warning instead.
+     */
+    @Value.Default
+    public boolean emitDuplicateJavaMethodNames() {
+        return false;
+    }
+
+    /**
      * A Java format string, expected to have exactly one %s where a generic should be placed.
      * Specifies what return types should look like.
      * For example, suppose a Java endpoint returned a string, then for a value of "Foo&lt;Bar&lt;%s&gt;&gt;" for this property,

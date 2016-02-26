@@ -156,20 +156,24 @@ public final class ServiceEmitter {
     }
 
     public void emitTypescriptInterface() {
-        Set<String> duplicateEndpointNames = getDuplicateEndpointNames();
+        Set<String> endpointsToWarnAboutDuplicateNames = Sets.newHashSet();
+        if (!this.settings.emitDuplicateJavaMethodNames()) {
+            endpointsToWarnAboutDuplicateNames = getDuplicateEndpointNames();
+        }
+
         writer.writeLine("");
         writer.writeLine("export interface " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
         writer.increaseIndent();
 
         for (ServiceEndpointModel endpointModel: model.endpointModels()) {
-            if (!duplicateEndpointNames.contains(endpointModel.endpointName())) {
+            if (!endpointsToWarnAboutDuplicateNames.contains(endpointModel.endpointName())) {
                 String line = endpointModel.endpointName() + "(";
                 line += getEndpointParametersString(endpointModel);
                 line += String.format("): " + settings.genericEndpointReturnType(), endpointModel.tsReturnType().toString()) + ";";
                 writer.writeLine(line);
             }
         }
-        for (String endpointName : duplicateEndpointNames) {
+        for (String endpointName : endpointsToWarnAboutDuplicateNames) {
             writer.writeLine(String.format("// WARNING: not creating method declaration, java service has multiple methods with the name %s", endpointName));
         }
 
