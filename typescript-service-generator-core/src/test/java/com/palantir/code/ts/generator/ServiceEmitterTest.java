@@ -27,6 +27,7 @@ public class ServiceEmitterTest {
     public void before() {
         this.settings = ImmutableTypescriptServiceGeneratorConfiguration.builder()
                                                                         .copyrightHeader("")
+                                                                        .emitDuplicateJavaMethodNames(false)
                                                                         .generatedFolderLocation(new File(""))
                                                                         .generatedMessage("")
                                                                         .genericEndpointReturnType("FooType<%s>")
