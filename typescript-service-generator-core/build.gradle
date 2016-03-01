@@ -10,11 +10,11 @@ dependencies {
     compile "com.google.guava:guava:${guavaVersion}"
     compile "javax.ws.rs:javax.ws.rs-api:${jaxRsVersion}"
     compile "commons-io:commons-io:${commonsIOVersion}"
+    compile "org.apache.commons:commons-lang3:${lang3Version}"
     compile "com.google.code.findbugs:annotations:${findbugsAnnotationsVersion}"
 
     processor "org.immutables:value:${immutablesVersion}"
 
     testCompile "junit:junit:${junitVersion}"
     testCompile "org.mockito:mockito-core:${mockitoVersion}"
-    testCompile "org.apache.commons:commons-lang3:${lang3Version}"
 }

@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.palantir.code.ts.generator.model.ServiceModel;
+import com.palantir.code.ts.generator.utils.TestUtils.ConcreteObjectService;
 import com.palantir.code.ts.generator.utils.TestUtils.DuplicateMethodNamesService;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
 
@@ -175,6 +176,39 @@ public class ServiceEmitterTest {
 "    constructor(httpApiBridge: HttpApiBridge) {\n" +
 "        this.httpApiBridge = httpApiBridge;\n" +
 "    }\n" +
+"}\n";
+        assertEquals(expectedOutput, new String(stream.toByteArray()));
+    }
+
+    @Test
+    public void testConcreteObjectService() {
+        ServiceModel model = serviceClassParser.parseServiceClass(ConcreteObjectService.class, settings);
+        ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
+        serviceEmitter.emitTypescriptClass();
+        writer.close();
+        String expectedOutput = "\n" +
+"export class ConcreteObjectServiceImpl implements ConcreteObjectService {\n" + 
+"\n" + 
+"    private httpApiBridge: HttpApiBridge;\n" + 
+"    constructor(httpApiBridge: HttpApiBridge) {\n" + 
+"        this.httpApiBridge = httpApiBridge;\n" + 
+"    }\n" + 
+"\n" + 
+"    public noPathGetter() {\n" + 
+"        var httpCallData = <HttpEndpointOptions> {\n" + 
+"            serviceIdentifier: \"concreteObjectService\",\n" + 
+"            endpointPath: \"concreteObject\",\n" + 
+"            endpointName: \"noPathGetter\",\n" + 
+"            method: \"GET\",\n" + 
+"            mediaType: \"application/json\",\n" + 
+"            requiredHeaders: [],\n" + 
+"            pathArguments: [],\n" + 
+"            queryArguments: {\n" + 
+"            },\n" + 
+"            data: null\n" + 
+"        };\n" + 
+"        return this.httpApiBridge.callEndpoint<string>(httpCallData);\n" + 
+"    }\n" + 
 "}\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
