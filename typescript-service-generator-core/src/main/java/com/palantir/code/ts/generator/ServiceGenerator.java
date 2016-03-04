@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -51,6 +52,10 @@ public final class ServiceGenerator {
     }
 
     public void generateTypescriptService(Class<?> clazz) {
+        this.generateTypescriptService(clazz, Lists.newArrayList());
+    }
+
+    public void generateTypescriptService(Class<?> clazz, List<Type> additionalClassesToOutput) {
         OutputStream output = null;
         try {
             output = new FileOutputStream(new File(settings.generatedFolderLocation(), Character.toLowerCase(clazz.getSimpleName().charAt(0)) + clazz.getSimpleName().substring(1) + ".ts"));
@@ -62,7 +67,7 @@ public final class ServiceGenerator {
 
         ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(clazz, settings);
         ServiceEmitter serviceEndpointEmitter = new ServiceEmitter(serviceModel, settings, writer);
-        serviceEndpointEmitter.emitTypescriptTypes(settings);
+        serviceEndpointEmitter.emitTypescriptTypes(settings, additionalClassesToOutput);
         serviceEndpointEmitter.emitTypescriptInterface();
         serviceEndpointEmitter.emitTypescriptClass();
 
