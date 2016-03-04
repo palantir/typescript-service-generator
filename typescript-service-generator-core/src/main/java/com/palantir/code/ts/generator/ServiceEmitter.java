@@ -52,11 +52,12 @@ public final class ServiceEmitter {
         this.writer = writer;
     }
 
-    public void emitTypescriptTypes(TypescriptServiceGeneratorConfiguration settings) {
+    public void emitTypescriptTypes(TypescriptServiceGeneratorConfiguration settings, List<Type> additionalTypesToOutput) {
         Settings settingsToUse = settings.getSettings();
         TypeProcessor baseTypeProcessor = settingsToUse.customTypeProcessor;
 
-        Set<Type> referencedTypes = model.referencedTypes();
+        Set<Type> referencedTypes = Sets.newHashSet(model.referencedTypes().iterator());
+        referencedTypes.addAll(additionalTypesToOutput);
         Set<Class<?>> referencedClasses = getReferencedClasses(referencedTypes, settings);
         final Set<Type> discoveredTypes = Sets.newHashSet(referencedClasses.iterator());
         referencedClasses = filterInputClasses(referencedClasses);

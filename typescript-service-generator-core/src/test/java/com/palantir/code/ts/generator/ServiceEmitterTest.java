@@ -12,10 +12,13 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
 import com.palantir.code.ts.generator.model.ServiceModel;
 import com.palantir.code.ts.generator.utils.TestUtils.ConcreteObjectService;
 import com.palantir.code.ts.generator.utils.TestUtils.DuplicateMethodNamesService;
+import com.palantir.code.ts.generator.utils.TestUtils.MyObject;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
+import com.palantir.code.ts.generator.utils.TestUtils.TestServiceClass;
 
 public class ServiceEmitterTest {
 
@@ -45,7 +48,7 @@ public class ServiceEmitterTest {
     public void testComplexServiceClassEmitTypes() {
         ServiceModel model = serviceClassParser.parseServiceClass(TestComplexServiceClass.class, settings);
         ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
-        serviceEmitter.emitTypescriptTypes(settings);
+        serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList());
         writer.close();
         String expectedOutput = "" +
 "\n" +
@@ -84,7 +87,7 @@ public class ServiceEmitterTest {
     }
 
     @Test
-    public void testComplexServicClassEmitClass() {
+    public void testComplexServiceClassEmitClass() {
         ServiceModel model = serviceClassParser.parseServiceClass(TestComplexServiceClass.class, settings);
         ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
         serviceEmitter.emitTypescriptClass();
@@ -187,29 +190,42 @@ public class ServiceEmitterTest {
         serviceEmitter.emitTypescriptClass();
         writer.close();
         String expectedOutput = "\n" +
-"export class ConcreteObjectServiceImpl implements ConcreteObjectService {\n" + 
-"\n" + 
-"    private httpApiBridge: HttpApiBridge;\n" + 
-"    constructor(httpApiBridge: HttpApiBridge) {\n" + 
-"        this.httpApiBridge = httpApiBridge;\n" + 
-"    }\n" + 
-"\n" + 
-"    public noPathGetter() {\n" + 
-"        var httpCallData = <HttpEndpointOptions> {\n" + 
-"            serviceIdentifier: \"concreteObjectService\",\n" + 
-"            endpointPath: \"concreteObject\",\n" + 
-"            endpointName: \"noPathGetter\",\n" + 
-"            method: \"GET\",\n" + 
-"            mediaType: \"application/json\",\n" + 
-"            requiredHeaders: [],\n" + 
-"            pathArguments: [],\n" + 
-"            queryArguments: {\n" + 
-"            },\n" + 
-"            data: null\n" + 
-"        };\n" + 
-"        return this.httpApiBridge.callEndpoint<string>(httpCallData);\n" + 
-"    }\n" + 
+"export class ConcreteObjectServiceImpl implements ConcreteObjectService {\n" +
+"\n" +
+"    private httpApiBridge: HttpApiBridge;\n" +
+"    constructor(httpApiBridge: HttpApiBridge) {\n" +
+"        this.httpApiBridge = httpApiBridge;\n" +
+"    }\n" +
+"\n" +
+"    public noPathGetter() {\n" +
+"        var httpCallData = <HttpEndpointOptions> {\n" +
+"            serviceIdentifier: \"concreteObjectService\",\n" +
+"            endpointPath: \"concreteObject\",\n" +
+"            endpointName: \"noPathGetter\",\n" +
+"            method: \"GET\",\n" +
+"            mediaType: \"application/json\",\n" +
+"            requiredHeaders: [],\n" +
+"            pathArguments: [],\n" +
+"            queryArguments: {\n" +
+"            },\n" +
+"            data: null\n" +
+"        };\n" +
+"        return this.httpApiBridge.callEndpoint<string>(httpCallData);\n" +
+"    }\n" +
 "}\n";
+        assertEquals(expectedOutput, new String(stream.toByteArray()));
+    }
+
+    @Test
+    public void testAdditionalClassesToOutput() {
+        ServiceModel model = serviceClassParser.parseServiceClass(TestServiceClass.class, settings);
+        ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
+        serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList(MyObject.class));
+        writer.close();
+        String expectedOutput = "\n" +
+"    export interface MyObject {\n" +
+"        y: MyObject;\n" +
+"    }\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 }
