@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 import com.palantir.code.ts.generator.model.ServiceModel;
 import com.palantir.code.ts.generator.utils.TestUtils.ConcreteObjectService;
 import com.palantir.code.ts.generator.utils.TestUtils.DuplicateMethodNamesService;
+import com.palantir.code.ts.generator.utils.TestUtils.EnumClass;
 import com.palantir.code.ts.generator.utils.TestUtils.MyObject;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
 import com.palantir.code.ts.generator.utils.TestUtils.TestServiceClass;
@@ -37,8 +38,6 @@ public class ServiceEmitterTest {
                                                                         .genericEndpointReturnType("FooType<%s>")
                                                                         .typescriptModule("")
                                                                         .build();
-        this.settings.getSettings().noFileComment = true;
-        this.settings.getSettings().sortDeclarations = true;
         this.stream = new ByteArrayOutputStream();
         this.writer = new IndentedOutputWriter(stream, settings);
         this.serviceClassParser = new ServiceClassParser();
@@ -226,6 +225,17 @@ public class ServiceEmitterTest {
 "    export interface MyObject {\n" +
 "        y: MyObject;\n" +
 "    }\n";
+        assertEquals(expectedOutput, new String(stream.toByteArray()));
+    }
+
+    @Test
+    public void testEnumClass() {
+        ServiceModel model = serviceClassParser.parseServiceClass(EnumClass.class, settings);
+        ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
+        serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList());
+        writer.close();
+        String expectedOutput = "\n" +
+"    export type MyEnum = \"VALUE1\" | \"VALUE2\";\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 }

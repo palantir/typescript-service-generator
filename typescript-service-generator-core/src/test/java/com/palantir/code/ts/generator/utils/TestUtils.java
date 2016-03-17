@@ -52,6 +52,14 @@ public class TestUtils {
         String stringGetter(@CheckForNull Integer y, @PathParam("a") String a, @PathParam("b") String b);
     }
 
+    @Path("/enumParametersClass")
+    public interface EnumClass {
+
+        @GET
+        @Path("/enumGetter")
+        MyEnum enumGetter();
+    }
+
     @Path("/duplicateMethods")
     public interface DuplicateMethodNamesService {
 
@@ -71,6 +79,10 @@ public class TestUtils {
         public String noPathGetter() {
             return "";
         };
+    }
+
+    public enum MyEnum {
+        VALUE1, VALUE2
     }
 
     public static class MyObject {

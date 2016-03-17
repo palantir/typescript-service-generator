@@ -26,6 +26,7 @@ import cz.habarta.typescript.generator.JsonLibrary;
 import cz.habarta.typescript.generator.Settings;
 import cz.habarta.typescript.generator.TsType;
 import cz.habarta.typescript.generator.TypeProcessor;
+import cz.habarta.typescript.generator.TypeScriptOutputKind;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
@@ -159,6 +160,7 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.sortDeclarations = true;
         settings.noFileComment = true;
         settings.jsonLibrary = JsonLibrary.jackson2;
+        settings.outputKind = TypeScriptOutputKind.global;
 
         return settings;
     }
