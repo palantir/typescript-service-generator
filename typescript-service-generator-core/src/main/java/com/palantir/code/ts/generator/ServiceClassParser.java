@@ -26,9 +26,11 @@ import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointParameterModel;
@@ -46,7 +48,7 @@ import cz.habarta.typescript.generator.TypeScriptGenerator;
 public final class ServiceClassParser {
     @SuppressWarnings("unchecked")
     private final static List<Class<? extends Annotation>> ANNOTATION_CLASSES = Lists.newArrayList(POST.class, GET.class, DELETE.class, PUT.class, OPTIONS.class);
-    
+
     public Set<Method> getAllServiceMethods(Class<?> serviceClass) {
         Set<Method> serviceMethods = Sets.newHashSet();
         for (Class<? extends Annotation> annotation : ANNOTATION_CLASSES) {
@@ -74,74 +76,89 @@ public final class ServiceClassParser {
         ModelCompiler compiler = new TypeScriptGenerator(settings.getSettings()).getModelCompiler();
 
         List<ServiceEndpointModel> endpointModels = Lists.newArrayList();
-        for (Method method : serviceMethods) {
-            endpointModels.add(computeEndpointModel(method, compiler, settings));
-        }
+        endpointModels = computeEndpointModels(serviceMethods, compiler, settings);
+
         Collections.sort(endpointModels);
         serviceModel.endpointModels(endpointModels);
         return serviceModel.build();
     }
 
-    private static ServiceEndpointModel computeEndpointModel(Method endpoint, ModelCompiler compiler, TypescriptServiceGeneratorConfiguration settings) {
-        ImmutableServiceEndpointModel.Builder ret = ImmutableServiceEndpointModel.builder();
-        ret.endpointName(endpoint.getName());
-        ret.javaReturnType(endpoint.getGenericReturnType());
-        ret.tsReturnType(compiler.typeFromJavaWithReplacement(endpoint.getGenericReturnType()));
-        ret.endpointMethodType(getMethodType(endpoint));
-
-        String annotationValue = "";
-        if (endpoint.getAnnotation(Path.class) != null) {
-            annotationValue = endpoint.getAnnotation(Path.class).value();
+    private static List<ServiceEndpointModel> computeEndpointModels(Set<Method> endpoints, ModelCompiler compiler, TypescriptServiceGeneratorConfiguration settings) {
+        Multimap<String, Method> endpointNameMap = ArrayListMultimap.create();
+        Map<Method, String> endpointNameGetter = Maps.newHashMap();
+        for (Method endpoint : endpoints) {
+            endpointNameMap.put(endpoint.getName(), endpoint);
+            endpointNameGetter.put(endpoint, endpoint.getName());
         }
-        ret.endpointPath(PathUtils.trimSlashes(annotationValue));
-        Consumes consumes = endpoint.getAnnotation(Consumes.class);
-        if (consumes != null) {
-            if (consumes.value().length > 1) {
-                throw new IllegalArgumentException("Don't know how to handle an endpoint with multiple consume types");
+        for (String endpointName : endpointNameMap.keySet()) {
+            List<Method> maybeDuplicates = Lists.newArrayList(endpointNameMap.get(endpointName).iterator());
+            if (maybeDuplicates != null && maybeDuplicates.size() > 1) {
+                endpointNameGetter.putAll(settings.duplicateEndpointNameResolver().resolveDuplicateNames(maybeDuplicates));
             }
-            ret.endpointMediaType(consumes.value()[0]);
         }
+        List<ServiceEndpointModel> result = Lists.newArrayList();
+        for (Method endpoint : endpoints) {
+            ImmutableServiceEndpointModel.Builder ret = ImmutableServiceEndpointModel.builder();
+            ret.endpointName(endpointNameGetter.get(endpoint));
+            ret.javaReturnType(endpoint.getGenericReturnType());
+            ret.tsReturnType(compiler.typeFromJavaWithReplacement(endpoint.getGenericReturnType()));
+            ret.endpointMethodType(getMethodType(endpoint));
 
-        List<Map<Class<?>, Annotation>> annotationList = getParamterAnnotationMaps(endpoint);
-        List<ServiceEndpointParameterModel> mandatoryParameters = Lists.newArrayList();
-        List<ServiceEndpointParameterModel> optionalParameters = Lists.newArrayList();
-        int annotationListIndex = 0;
-        for (Type javaParameterType : endpoint.getGenericParameterTypes()) {
-            Map<Class<?>, Annotation> annotations = annotationList.get(annotationListIndex);
-            ImmutableServiceEndpointParameterModel.Builder parameterModel = ImmutableServiceEndpointParameterModel.builder();
+            String annotationValue = "";
+            if (endpoint.getAnnotation(Path.class) != null) {
+                annotationValue = endpoint.getAnnotation(Path.class).value();
+            }
+            ret.endpointPath(PathUtils.trimSlashes(annotationValue));
+            Consumes consumes = endpoint.getAnnotation(Consumes.class);
+            if (consumes != null) {
+                if (consumes.value().length > 1) {
+                    throw new IllegalArgumentException("Don't know how to handle an endpoint with multiple consume types");
+                }
+                ret.endpointMediaType(consumes.value()[0]);
+            }
 
-            // if parameter is annotated with any ignored annotations, skip it entirely
-            if (!Collections.disjoint(annotations.keySet(), settings.ignoredAnnotations())) {
+            List<Map<Class<?>, Annotation>> annotationList = getParamterAnnotationMaps(endpoint);
+            List<ServiceEndpointParameterModel> mandatoryParameters = Lists.newArrayList();
+            List<ServiceEndpointParameterModel> optionalParameters = Lists.newArrayList();
+            int annotationListIndex = 0;
+            for (Type javaParameterType : endpoint.getGenericParameterTypes()) {
+                Map<Class<?>, Annotation> annotations = annotationList.get(annotationListIndex);
+                ImmutableServiceEndpointParameterModel.Builder parameterModel = ImmutableServiceEndpointParameterModel.builder();
+
+                // if parameter is annotated with any ignored annotations, skip it entirely
+                if (!Collections.disjoint(annotations.keySet(), settings.ignoredAnnotations())) {
+                    annotationListIndex++;
+                    continue;
+                }
+
+                PathParam path = (PathParam) annotations.get(PathParam.class);
+                if (path != null) {
+                    parameterModel.pathParam(path.value());
+                }
+                HeaderParam header = (HeaderParam) annotations.get(HeaderParam.class);
+                if (header != null) {
+                    parameterModel.headerParam(header.value());
+                }
+                QueryParam query = (QueryParam) annotations.get(QueryParam.class);
+                if (query != null) {
+                    parameterModel.queryParam(query.value());
+                }
+
+                parameterModel.javaType(javaParameterType);
+                TsType tsType = compiler.typeFromJavaWithReplacement(javaParameterType);
+                parameterModel.tsType(tsType);
+                if (tsType instanceof TsType.OptionalType || query != null) {
+                    optionalParameters.add(parameterModel.build());
+                } else {
+                    mandatoryParameters.add(parameterModel.build());
+                }
                 annotationListIndex++;
-                continue;
             }
 
-            PathParam path = (PathParam) annotations.get(PathParam.class);
-            if (path != null) {
-                parameterModel.pathParam(path.value());
-            }
-            HeaderParam header = (HeaderParam) annotations.get(HeaderParam.class);
-            if (header != null) {
-                parameterModel.headerParam(header.value());
-            }
-            QueryParam query = (QueryParam) annotations.get(QueryParam.class);
-            if (query != null) {
-                parameterModel.queryParam(query.value());
-            }
-
-            parameterModel.javaType(javaParameterType);
-            TsType tsType = compiler.typeFromJavaWithReplacement(javaParameterType);
-            parameterModel.tsType(tsType);
-            if (tsType instanceof TsType.OptionalType || query != null) {
-                optionalParameters.add(parameterModel.build());
-            } else {
-                mandatoryParameters.add(parameterModel.build());
-            }
-            annotationListIndex++;
+            ret.parameters(ImmutableList.<ServiceEndpointParameterModel> builder().addAll(mandatoryParameters).addAll(optionalParameters).build());
+            result.add(ret.build());
         }
-
-        ret.parameters(ImmutableList.<ServiceEndpointParameterModel> builder().addAll(mandatoryParameters).addAll(optionalParameters).build());
-        return ret.build();
+        return result;
     }
 
     private static String getMethodType(Method endpoint) {
