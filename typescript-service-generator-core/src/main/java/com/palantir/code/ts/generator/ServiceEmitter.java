@@ -131,8 +131,12 @@ public final class ServiceEmitter {
                         throw new IllegalStateException("There should only be one data argument per endpoint. Found both" + dataArgument + " and " + parameterModel.getParameterName());
                     }
                     dataArgument = parameterModel.getParameterName();
-                    if (parameterModel.tsType().toString().equals("string")) {
-                        // strings have to be wrapped in quotes in order to be valid json
+                    boolean isEnum = false;
+                    if (parameterModel.javaType() instanceof Class<?>) {
+                        isEnum = ((Class<?>) parameterModel.javaType()).isEnum();
+                    }
+                    if (endpointModel.endpointMediaType().equals("application/json") && (parameterModel.tsType().toString().equals("string") || isEnum)) {
+                        // strings (and enums, the wire format of an enum is a string) have to be wrapped in quotes in order to be valid json
                         dataArgument = "`\"${" + parameterModel.getParameterName() + "}\"`";
                     }
                 }
