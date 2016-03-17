@@ -9,8 +9,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -29,10 +27,9 @@ import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ServiceModel;
 import com.palantir.code.ts.generator.utils.PathUtils;
 
-import cz.habarta.typescript.generator.ModelCompiler;
+import cz.habarta.typescript.generator.Input;
+import cz.habarta.typescript.generator.Output;
 import cz.habarta.typescript.generator.Settings;
-import cz.habarta.typescript.generator.TsType;
-import cz.habarta.typescript.generator.TsType.EnumType;
 import cz.habarta.typescript.generator.TypeProcessor;
 import cz.habarta.typescript.generator.TypeProcessor.Context;
 import cz.habarta.typescript.generator.TypeProcessor.Result;
@@ -76,8 +73,9 @@ public final class ServiceEmitter {
 
         TypeScriptGenerator typescriptGenerator = new TypeScriptGenerator(settingsToUse);
         ByteArrayOutputStream typeDeclarations = new ByteArrayOutputStream();
-        typescriptGenerator.generateEmbeddableTypeScript(Lists.newArrayList(referencedClasses.iterator()), typeDeclarations, true, 1);
-        writeEnums(discoveredTypes, typescriptGenerator.getModelCompiler());
+        Type[] types = new Type[referencedClasses.size()];
+        referencedClasses.toArray(types);
+        typescriptGenerator.generateEmbeddableTypeScript(Input.from(types), Output.to(typeDeclarations), true, 1);
         writer.write(new String(typeDeclarations.toByteArray()));
     }
 
@@ -217,40 +215,11 @@ public final class ServiceEmitter {
         return Joiner.on(", ").join(parameterStrings);
     }
 
-    private void writeEnums(Set<Type> referencedTypes, ModelCompiler compiler) {
-        //TODO: this won't be necessary once typescript supports enums
-        List<EnumType> enums = Lists.newArrayList();
-        for (Type type : referencedTypes) {
-            TsType tsType = compiler.typeFromJava(type);
-            if (tsType instanceof EnumType) {
-                enums.add((EnumType) tsType);
-            }
-        }
-        Collections.sort(enums, new Comparator<EnumType>() {
-            @Override
-            public int compare(EnumType a, EnumType b) {
-                return a.name.compareTo(b.name);
-            }
-        });
-        for (EnumType tsEnum : enums) {
-            writer.writeLine("");
-            List<String> values = Lists.newArrayList(tsEnum.values.iterator());
-            Collections.sort(values);
-            writer.writeLine(String.format("export var %s = {", tsEnum.name));
-            writer.increaseIndent();
-            for (int i = 0; i < values.size(); i++) {
-                String value = values.get(i);
-                writer.writeLine(String.format("%s: \"%s\"%s", value, value, i == values.size() - 1 ? "" : ","));
-            }
-            writer.decreaseIndent();
-            writer.writeLine("};");
-        }
-    }
-
     private Set<Class<?>> filterInputClasses(Set<Class<?>> referencedClasses) {
         Set<Class<?>> typesToUse = Sets.newHashSet();
         for (Class<?> beanClass : referencedClasses) {
             if (beanClass.isEnum()) {
+                typesToUse.add(beanClass);
                 continue;
             }
             if (beanClass.equals(void.class)) {

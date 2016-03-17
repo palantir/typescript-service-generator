@@ -31,8 +31,11 @@ import com.palantir.code.ts.generator.utils.TestUtils.MyObject;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
 import com.palantir.code.ts.generator.utils.TestUtils.TestServiceClass;
 
+import cz.habarta.typescript.generator.JsonLibrary;
 import cz.habarta.typescript.generator.Settings;
 import cz.habarta.typescript.generator.TsType;
+import cz.habarta.typescript.generator.TsType.StructuralType;
+import cz.habarta.typescript.generator.TypeScriptOutputKind;
 
 public class ServiceClassParserTest {
 
@@ -44,7 +47,10 @@ public class ServiceClassParserTest {
         this.serviceClassParser = new ServiceClassParser();
         this.settings = Mockito.mock(TypescriptServiceGeneratorConfiguration.class);
 
-        Mockito.when(this.settings.getSettings()).thenReturn(new Settings());
+        Settings settings = new Settings();
+        settings.outputKind = TypeScriptOutputKind.global;
+        settings.jsonLibrary = JsonLibrary.jackson2;
+        Mockito.when(this.settings.getSettings()).thenReturn(settings);
     }
 
     @Test
@@ -79,7 +85,7 @@ public class ServiceClassParserTest {
             ServiceEndpointParameterModel bParam = ImmutableServiceEndpointParameterModel.builder().queryParam("b").javaType(Integer.class).tsType(TsType.Number).build();
             ServiceEndpointParameterModel dataParam = ImmutableServiceEndpointParameterModel.builder().javaType(DataObject.class).tsType(new TsType.StructuralType("DataObject")).build();
             endpoints.add(ImmutableServiceEndpointModel.builder().javaReturnType(genericReturnType)
-                                                                 .tsReturnType(new TsType.StructuralType("GenericObject"))
+                                                                 .tsReturnType(new StructuralType("GenericObject<MyObject>"))
                                                                  .parameters(Lists.newArrayList(aParam, dataParam, bParam))
                                                                  .endpointName("allOptionsPost")
                                                                  .endpointPath("allOptionsPost/{a}")
@@ -107,7 +113,9 @@ public class ServiceClassParserTest {
                                                                  .build());
         }
         // To string because TsType has no equals method
-        assertEquals(model.endpointModels().toString(), endpoints.toString());
+        System.out.println(model.endpointModels().toString());
+        System.out.println(endpoints.toString());
+        assertEquals(endpoints.toString(), model.endpointModels().toString());
     }
 
     @Test
