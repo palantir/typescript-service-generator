@@ -5,12 +5,14 @@
 package com.palantir.code.ts.generator;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.immutables.value.Value;
@@ -19,6 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import cz.habarta.typescript.generator.GenericsTypeProcessor;
@@ -52,6 +55,20 @@ public abstract class TypescriptServiceGeneratorConfiguration {
             @Override
             public Result processType(Type javaType, Context context) {
                 return null;
+            }
+        };
+    }
+
+    /**
+     * Provides a strategy for resolving duplicate method names
+     * @return
+     */
+    @Value.Default
+    public DuplicateMethodNameResolver duplicateEndpointNameResolver() {
+        return new DuplicateMethodNameResolver() {
+            @Override
+            public Map<Method, String> resolveDuplicateNames(List<Method> methodsWithSameName) {
+                return Maps.newHashMap();
             }
         };
     }
@@ -163,5 +180,13 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.outputKind = TypeScriptOutputKind.global;
 
         return settings;
+    }
+
+    public interface DuplicateMethodNameResolver {
+        /**
+         * Takes a list of methods that all have the same name, returns a map of resolved names, or
+         * null if the names can't be resolved
+         */
+        Map<Method, String> resolveDuplicateNames(List<Method> methodsWithSameName);
     }
 }

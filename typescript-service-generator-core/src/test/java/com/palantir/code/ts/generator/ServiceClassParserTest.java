@@ -5,9 +5,14 @@
 package com.palantir.code.ts.generator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.CheckForNull;
 
@@ -17,13 +22,16 @@ import org.mockito.Mockito;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.palantir.code.ts.generator.TypescriptServiceGeneratorConfiguration.DuplicateMethodNameResolver;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ServiceModel;
 import com.palantir.code.ts.generator.utils.TestUtils.DataObject;
+import com.palantir.code.ts.generator.utils.TestUtils.DuplicateMethodNamesService;
 import com.palantir.code.ts.generator.utils.TestUtils.GenericObject;
 import com.palantir.code.ts.generator.utils.TestUtils.IgnoredParametersClass;
 import com.palantir.code.ts.generator.utils.TestUtils.ImmutablesObject;
@@ -113,8 +121,6 @@ public class ServiceClassParserTest {
                                                                  .build());
         }
         // To string because TsType has no equals method
-        System.out.println(model.endpointModels().toString());
-        System.out.println(endpoints.toString());
         assertEquals(endpoints.toString(), model.endpointModels().toString());
     }
 
@@ -136,5 +142,31 @@ public class ServiceClassParserTest {
                                                                                                .endpointMethodType("GET")
                                                                                                .build();
         assertEquals(model.endpointModels(), Lists.newArrayList(stringGetterEndpointModel));
+    }
+
+    @Test
+    public void duplicateNameResolutionTest() {
+        // Mock out a simple resolver that does the resolution based on number of parameters
+        Mockito.when(settings.duplicateEndpointNameResolver()).thenReturn(new DuplicateMethodNameResolver() {
+            @Override
+            public Map<Method, String> resolveDuplicateNames(List<Method> methodsWithSameName) {
+                Map<Method, String> result = Maps.newHashMap();
+                for (Method method : methodsWithSameName) {
+                    if (method.getParameterTypes().length > 0) {
+                        result.put(method, "nonZeroParameters");
+                    } else {
+                        result.put(method, "zeroParameters");
+                    }
+                }
+                return result;
+            }
+        });
+        ServiceModel model = serviceClassParser.parseServiceClass(DuplicateMethodNamesService.class, settings);
+        List<ServiceEndpointModel> endpointModels = Lists.newArrayList(model.endpointModels().iterator());
+        Collections.sort(endpointModels);
+        assertEquals(Lists.newArrayList("nonZeroParameters", "zeroParameters"),
+                     endpointModels.stream().map(endpoint -> endpoint.endpointName()).collect(Collectors.toList()));
+        assertTrue(endpointModels.get(0).parameters().size() > 0);
+        assertTrue(endpointModels.get(1).parameters().size() == 0);
     }
 }
