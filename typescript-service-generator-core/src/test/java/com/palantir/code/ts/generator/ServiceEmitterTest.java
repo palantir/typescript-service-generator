@@ -235,7 +235,12 @@ public class ServiceEmitterTest {
         serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList());
         writer.close();
         String expectedOutput = "\n" +
-"    export type MyEnum = \"VALUE1\" | \"VALUE2\";\n";
+"    export type MyEnum = \"VALUE1\" | \"VALUE2\";\n" +
+"\n" +
+"    export const MyEnum = {\n" +
+"        VALUE1: <MyEnum>\"VALUE1\",\n" +
+"        VALUE2: <MyEnum>\"VALUE2\",\n" +
+"    }\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 }
