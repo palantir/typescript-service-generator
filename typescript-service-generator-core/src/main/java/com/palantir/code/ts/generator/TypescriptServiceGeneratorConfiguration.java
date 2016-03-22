@@ -29,7 +29,9 @@ import cz.habarta.typescript.generator.JsonLibrary;
 import cz.habarta.typescript.generator.Settings;
 import cz.habarta.typescript.generator.TsType;
 import cz.habarta.typescript.generator.TypeProcessor;
+import cz.habarta.typescript.generator.TypeScriptFileType;
 import cz.habarta.typescript.generator.TypeScriptOutputKind;
+import cz.habarta.typescript.generator.ext.EnumConstantsExtension;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
@@ -178,6 +180,8 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.noFileComment = true;
         settings.jsonLibrary = JsonLibrary.jackson2;
         settings.outputKind = TypeScriptOutputKind.global;
+        settings.outputFileType = TypeScriptFileType.implementationFile;
+        settings.extensions = Lists.newArrayList(new EnumConstantsExtension());
 
         return settings;
     }
