@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.palantir.code.ts.generator.TypescriptServiceGeneratorConfiguration.DuplicateMethodNameResolver;
+import com.palantir.code.ts.generator.TypescriptServiceGeneratorConfiguration.MethodFilter;
 import com.palantir.code.ts.generator.model.ImmutableInnerServiceModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointParameterModel;
@@ -64,6 +65,12 @@ public class ServiceClassParserTest {
         settings.outputKind = TypeScriptOutputKind.global;
         settings.jsonLibrary = JsonLibrary.jackson2;
         Mockito.when(this.settings.getSettings()).thenReturn(settings);
+        Mockito.when(this.settings.methodFilter()).thenReturn(new MethodFilter() {
+            @Override
+            public boolean shouldGenerateMethod(Class<?> parentClass, Method method) {
+                return true;
+            }
+        });
     }
 
     @Test
@@ -177,6 +184,29 @@ public class ServiceClassParserTest {
                      endpointModels.stream().map(endpoint -> endpoint.endpointName()).collect(Collectors.toList()));
         assertTrue(endpointModels.get(0).parameters().size() > 0);
         assertTrue(endpointModels.get(1).parameters().size() == 0);
+    }
+
+    @Test
+    public void filterMethodTest() {
+        Mockito.when(settings.methodFilter()).thenReturn(new MethodFilter() {
+            @Override
+            public boolean shouldGenerateMethod(Class<?> parentClass, Method method) {
+                return false;
+            }
+        });
+        ServiceModel model = serviceClassParser.parseServiceClass(SimpleService1.class, settings);
+        assertEquals("SimpleService1", model.name());
+        InnerServiceModel innerService1 = ImmutableInnerServiceModel.builder()
+                                                                    .servicePath("simple1")
+                                                                    .name("SimpleService1")
+                                                                    .build();
+
+        ServiceModel expectedServiceModel = ImmutableServiceModel.builder()
+                                                                 .addInnerServiceModels(innerService1)
+                                                                 .name("SimpleService1")
+                                                                 .build();
+
+        assertEquals(expectedServiceModel, model);
     }
 
     @Test
