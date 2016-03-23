@@ -138,6 +138,19 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         return "";
     }
 
+    /**
+     * A filter for whether or not a method should be parsed from a class.
+     */
+    @Value.Default
+    public MethodFilter methodFilter() {
+        return new MethodFilter() {
+            @Override
+            public boolean shouldGenerateMethod(Class<?> parentClass, Method method) {
+                return true;
+            }
+        };
+    }
+
     public TypeProcessor getOverridingTypeParser() {
         TypeProcessor defaultTypeProcessor = new TypeProcessor() {
             @Override
@@ -192,5 +205,12 @@ public abstract class TypescriptServiceGeneratorConfiguration {
          * null if the names can't be resolved
          */
         Map<Method, String> resolveDuplicateNames(List<Method> methodsWithSameName);
+    }
+
+    public interface MethodFilter {
+        /**
+         * Return true if method should be generated, false otherwise
+         */
+        boolean shouldGenerateMethod(Class<?> parentClass, Method method);
     }
 }

@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.palantir.code.ts.generator.TypescriptServiceGeneratorConfiguration.MethodFilter;
 import com.palantir.code.ts.generator.model.ImmutableInnerServiceModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointParameterModel;
@@ -50,28 +51,30 @@ public final class ServiceClassParser {
     @SuppressWarnings("unchecked")
     private final static List<Class<? extends Annotation>> ANNOTATION_CLASSES = Lists.newArrayList(POST.class, GET.class, DELETE.class, PUT.class, OPTIONS.class);
 
-    public Set<Method> getAllServiceMethods(Class<?> serviceClass) {
+    public Set<Method> getAllServiceMethods(Class<?> serviceClass, MethodFilter methodFilter) {
         Set<Method> serviceMethods = Sets.newHashSet();
         for (Class<? extends Annotation> annotation : ANNOTATION_CLASSES) {
             for (Method method : MethodUtils.getMethodsListWithAnnotation(serviceClass, annotation)) {
-                serviceMethods.add(method);
+                if (methodFilter.shouldGenerateMethod(serviceClass, method)) {
+                    serviceMethods.add(method);
+                }
             }
         }
         return serviceMethods;
     }
 
-    public ServiceModel parseServiceClass(Class<?> serviceClass, TypescriptServiceGeneratorConfiguration settings, Class<?>... serviceClassesToMerge) {
-        List<Class<?>> serviceClazzes = Lists.newArrayList(serviceClass);
+    public ServiceModel parseServiceClass(Class<?> mainServiceClass, TypescriptServiceGeneratorConfiguration settings, Class<?>... serviceClassesToMerge) {
+        List<Class<?>> serviceClazzes = Lists.newArrayList(mainServiceClass);
         serviceClazzes.addAll(Lists.newArrayList(serviceClassesToMerge));
         ImmutableServiceModel.Builder serviceModel = ImmutableServiceModel.builder();
-        serviceModel.name(serviceClass.getSimpleName());
-        for (Class<?> serviceClazz : serviceClazzes) {
+        serviceModel.name(mainServiceClass.getSimpleName());
+        for (Class<?> serviceClass : serviceClazzes) {
             ImmutableInnerServiceModel.Builder innerServiceModel = ImmutableInnerServiceModel.builder();
-            Path servicePathAnnotation = serviceClazz.getAnnotation(Path.class);
+            Path servicePathAnnotation = serviceClass.getAnnotation(Path.class);
             innerServiceModel.servicePath(PathUtils.trimSlashes(servicePathAnnotation.value()));
-            innerServiceModel.name(serviceClazz.getSimpleName());
+            innerServiceModel.name(serviceClass.getSimpleName());
 
-            Set<Method> serviceMethods = getAllServiceMethods(serviceClazz);
+            Set<Method> serviceMethods = getAllServiceMethods(serviceClass, settings.methodFilter());
             // find and stores all types that are referenced by this service
             Set<Type> referencedTypes = Sets.newHashSet();
             for (Method method : serviceMethods) {
