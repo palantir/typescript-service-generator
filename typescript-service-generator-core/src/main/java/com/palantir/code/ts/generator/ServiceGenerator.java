@@ -56,16 +56,21 @@ public final class ServiceGenerator {
     }
 
     public void generateTypescriptService(Class<?> clazz, List<Type> additionalClassesToOutput) {
+        this.generateTypescriptService(clazz, additionalClassesToOutput, new Class<?>[0]);
+    }
+
+    public void generateTypescriptService(Class<?> serviceClass, List<Type> additionalClassesToOutput, Class<?>... serviceClassesToMerge) {
         OutputStream output = null;
+        String firstSimpleName = serviceClass.getSimpleName();
         try {
-            output = new FileOutputStream(new File(settings.generatedFolderLocation(), Character.toLowerCase(clazz.getSimpleName().charAt(0)) + clazz.getSimpleName().substring(1) + ".ts"));
+            output = new FileOutputStream(new File(settings.generatedFolderLocation(), Character.toLowerCase(firstSimpleName.charAt(0)) + firstSimpleName.substring(1) + ".ts"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
         IndentedOutputWriter writer = new IndentedOutputWriter(output, settings);
-        beginService(writer, clazz.getSimpleName());
+        beginService(writer, firstSimpleName);
 
-        ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(clazz, settings);
+        ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(serviceClass, settings, serviceClassesToMerge);
         ServiceEmitter serviceEndpointEmitter = new ServiceEmitter(serviceModel, settings, writer);
         serviceEndpointEmitter.emitTypescriptTypes(settings, additionalClassesToOutput);
         serviceEndpointEmitter.emitTypescriptInterface();

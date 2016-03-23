@@ -72,6 +72,22 @@ public class TestUtils {
         String duplicate(@PathParam("a") String a);
     }
 
+    @Path("/simple1")
+    public interface SimpleService1 {
+
+        @GET
+        @Path("/method1")
+        String method1();
+    }
+
+    @Path("/simple2")
+    public interface SimpleService2 {
+
+        @GET
+        @Path("/method2")
+        String method2();
+    }
+
     @Path("/concreteObject")
     public class ConcreteObjectService {
 
