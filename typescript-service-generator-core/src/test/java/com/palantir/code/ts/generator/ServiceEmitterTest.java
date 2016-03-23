@@ -18,6 +18,8 @@ import com.palantir.code.ts.generator.utils.TestUtils.ConcreteObjectService;
 import com.palantir.code.ts.generator.utils.TestUtils.DuplicateMethodNamesService;
 import com.palantir.code.ts.generator.utils.TestUtils.EnumClass;
 import com.palantir.code.ts.generator.utils.TestUtils.MyObject;
+import com.palantir.code.ts.generator.utils.TestUtils.SimpleService1;
+import com.palantir.code.ts.generator.utils.TestUtils.SimpleService2;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
 import com.palantir.code.ts.generator.utils.TestUtils.TestServiceClass;
 
@@ -160,6 +162,7 @@ public class ServiceEmitterTest {
         writer.close();
         String expectedOutput = "\n" +
 "export interface DuplicateMethodNamesService {\n" +
+"\n" +
 "    // WARNING: not creating method declaration, java service has multiple methods with the name duplicate\n" +
 "}\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
@@ -241,6 +244,24 @@ public class ServiceEmitterTest {
 "        VALUE1: <MyEnum>\"VALUE1\",\n" +
 "        VALUE2: <MyEnum>\"VALUE2\",\n" +
 "    }\n";
+        assertEquals(expectedOutput, new String(stream.toByteArray()));
+    }
+
+    @Test
+    public void testMultipleClasses() {
+        ServiceModel model = serviceClassParser.parseServiceClass(SimpleService1.class, settings, SimpleService2.class);
+        ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
+        serviceEmitter.emitTypescriptInterface();
+        writer.close();
+        String expectedOutput = "\n" +
+"export interface SimpleService1 {\n" +
+"\n" +
+"    // endpoints for service class: SimpleService1\n" +
+"    method1(): FooType<string>;\n" +
+"\n" +
+"    // endpoints for service class: SimpleService2\n" +
+"    method2(): FooType<string>;\n" +
+"}\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 }

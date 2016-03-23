@@ -4,9 +4,7 @@
 
 package com.palantir.code.ts.generator.model;
 
-import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Set;
 
 import org.immutables.value.Value;
 
@@ -15,10 +13,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
-@JsonDeserialize(as = ImmutableServiceModel.class)
-@JsonSerialize(as = ImmutableServiceModel.class)
-public abstract class ServiceModel {
-    public abstract Set<Type> referencedTypes();
+@JsonDeserialize(as = ImmutableInnerServiceModel.class)
+@JsonSerialize(as = ImmutableInnerServiceModel.class)
+public abstract class InnerServiceModel {
     public abstract String name();
-    public abstract List<InnerServiceModel> innerServiceModels();
+    public abstract String servicePath();
+    public abstract List<ServiceEndpointModel> endpointModels();
 }

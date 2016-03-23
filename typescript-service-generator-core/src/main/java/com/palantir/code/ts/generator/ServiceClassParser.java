@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.palantir.code.ts.generator.model.ImmutableInnerServiceModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ImmutableServiceModel;
@@ -59,27 +60,34 @@ public final class ServiceClassParser {
         return serviceMethods;
     }
 
-    public ServiceModel parseServiceClass(Class<?> serviceClass, TypescriptServiceGeneratorConfiguration settings) {
+    public ServiceModel parseServiceClass(Class<?> serviceClass, TypescriptServiceGeneratorConfiguration settings, Class<?>... serviceClassesToMerge) {
+        List<Class<?>> serviceClazzes = Lists.newArrayList(serviceClass);
+        serviceClazzes.addAll(Lists.newArrayList(serviceClassesToMerge));
         ImmutableServiceModel.Builder serviceModel = ImmutableServiceModel.builder();
-        Path servicePathAnnotation = serviceClass.getAnnotation(Path.class);
-        serviceModel.servicePath(PathUtils.trimSlashes(servicePathAnnotation.value()));
         serviceModel.name(serviceClass.getSimpleName());
+        for (Class<?> serviceClazz : serviceClazzes) {
+            ImmutableInnerServiceModel.Builder innerServiceModel = ImmutableInnerServiceModel.builder();
+            Path servicePathAnnotation = serviceClazz.getAnnotation(Path.class);
+            innerServiceModel.servicePath(PathUtils.trimSlashes(servicePathAnnotation.value()));
+            innerServiceModel.name(serviceClazz.getSimpleName());
 
-        Set<Method> serviceMethods = getAllServiceMethods(serviceClass);
-        // find and stores all types that are referenced by this service
-        Set<Type> referencedTypes = Sets.newHashSet();
-        for (Method method : serviceMethods) {
-            referencedTypes.addAll(getTypesFromEndpoint(method, settings));
+            Set<Method> serviceMethods = getAllServiceMethods(serviceClazz);
+            // find and stores all types that are referenced by this service
+            Set<Type> referencedTypes = Sets.newHashSet();
+            for (Method method : serviceMethods) {
+                referencedTypes.addAll(getTypesFromEndpoint(method, settings));
+            }
+            serviceModel.addAllReferencedTypes(referencedTypes);
+
+            ModelCompiler compiler = new TypeScriptGenerator(settings.getSettings()).getModelCompiler();
+
+            List<ServiceEndpointModel> endpointModels = Lists.newArrayList();
+            endpointModels = computeEndpointModels(serviceMethods, compiler, settings);
+
+            Collections.sort(endpointModels);
+            innerServiceModel.endpointModels(endpointModels);
+            serviceModel.addInnerServiceModels(innerServiceModel.build());
         }
-        serviceModel.referencedTypes(referencedTypes);
-
-        ModelCompiler compiler = new TypeScriptGenerator(settings.getSettings()).getModelCompiler();
-
-        List<ServiceEndpointModel> endpointModels = Lists.newArrayList();
-        endpointModels = computeEndpointModels(serviceMethods, compiler, settings);
-
-        Collections.sort(endpointModels);
-        serviceModel.endpointModels(endpointModels);
         return serviceModel.build();
     }
 

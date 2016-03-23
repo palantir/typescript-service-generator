@@ -22,6 +22,7 @@ import org.codehaus.jackson.type.JavaType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.palantir.code.ts.generator.model.InnerServiceModel;
 import com.palantir.code.ts.generator.model.ServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ServiceModel;
@@ -97,65 +98,71 @@ public final class ServiceEmitter {
         writer.decreaseIndent();
         writer.writeLine("}");
 
-        for (ServiceEndpointModel endpointModel: model.endpointModels()) {
-            if (endpointsToWarnAboutDuplicateNames.contains(endpointModel.endpointName())) {
-                // don't output any duplicates
-                continue;
+        for (InnerServiceModel innerServiceModel : model.innerServiceModels()) {
+            if (model.innerServiceModels().size() > 1) {
+                writer.writeLine("");
+                writer.writeLine("// endpoints for service class: " + innerServiceModel.name());
             }
-            writer.writeLine("");
-            String line = "public " + endpointModel.endpointName() + "(";
-            line += getEndpointParametersString(endpointModel);
-            line += ") {";
-            writer.writeLine(line);
-            writer.increaseIndent();
-            writer.writeLine(String.format("var httpCallData = <%sHttpEndpointOptions> {", settings.generatedInterfacePrefix()));
-            writer.increaseIndent();
-            writer.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
-            writer.writeLine("endpointPath: \"" + getEndpointPathString(model, endpointModel) + "\",");
-            writer.writeLine("endpointName: \"" + endpointModel.endpointName() + "\",");
-            writer.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
-            writer.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
-            List<String> requiredHeaders = Lists.newArrayList();
-            List<String> pathArguments = Lists.newArrayList();
-            List<String> queryArguments = Lists.newArrayList();
-            String dataArgument = null;
-            for (ServiceEndpointParameterModel parameterModel : endpointModel.parameters()) {
-                if (parameterModel.headerParam() != null) {
-                    requiredHeaders.add("\"" + parameterModel.headerParam() + "\"");
-                } else if (parameterModel.pathParam() != null) {
-                    pathArguments.add(parameterModel.getParameterName());
-                } else if (parameterModel.queryParam() != null) {
-                    queryArguments.add(parameterModel.queryParam());
-                } else {
-                    if (dataArgument != null) {
-                        throw new IllegalStateException("There should only be one data argument per endpoint. Found both" + dataArgument + " and " + parameterModel.getParameterName());
-                    }
-                    dataArgument = parameterModel.getParameterName();
-                    boolean isEnum = false;
-                    if (parameterModel.javaType() instanceof Class<?>) {
-                        isEnum = ((Class<?>) parameterModel.javaType()).isEnum();
-                    }
-                    if (endpointModel.endpointMediaType().equals("application/json") && (parameterModel.tsType().toString().equals("string") || isEnum)) {
-                        // strings (and enums, the wire format of an enum is a string) have to be wrapped in quotes in order to be valid json
-                        dataArgument = "`\"${" + parameterModel.getParameterName() + "}\"`";
+            for (ServiceEndpointModel endpointModel: innerServiceModel.endpointModels()) {
+                if (endpointsToWarnAboutDuplicateNames.contains(endpointModel.endpointName())) {
+                    // don't output any duplicates
+                    continue;
+                }
+                writer.writeLine("");
+                String line = "public " + endpointModel.endpointName() + "(";
+                line += getEndpointParametersString(endpointModel);
+                line += ") {";
+                writer.writeLine(line);
+                writer.increaseIndent();
+                writer.writeLine(String.format("var httpCallData = <%sHttpEndpointOptions> {", settings.generatedInterfacePrefix()));
+                writer.increaseIndent();
+                writer.writeLine("serviceIdentifier: \"" + Character.toLowerCase(model.name().charAt(0)) + model.name().substring(1) + "\",");
+                writer.writeLine("endpointPath: \"" + getEndpointPathString(innerServiceModel, endpointModel) + "\",");
+                writer.writeLine("endpointName: \"" + endpointModel.endpointName() + "\",");
+                writer.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
+                writer.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
+                List<String> requiredHeaders = Lists.newArrayList();
+                List<String> pathArguments = Lists.newArrayList();
+                List<String> queryArguments = Lists.newArrayList();
+                String dataArgument = null;
+                for (ServiceEndpointParameterModel parameterModel : endpointModel.parameters()) {
+                    if (parameterModel.headerParam() != null) {
+                        requiredHeaders.add("\"" + parameterModel.headerParam() + "\"");
+                    } else if (parameterModel.pathParam() != null) {
+                        pathArguments.add(parameterModel.getParameterName());
+                    } else if (parameterModel.queryParam() != null) {
+                        queryArguments.add(parameterModel.queryParam());
+                    } else {
+                        if (dataArgument != null) {
+                            throw new IllegalStateException("There should only be one data argument per endpoint. Found both" + dataArgument + " and " + parameterModel.getParameterName());
+                        }
+                        dataArgument = parameterModel.getParameterName();
+                        boolean isEnum = false;
+                        if (parameterModel.javaType() instanceof Class<?>) {
+                            isEnum = ((Class<?>) parameterModel.javaType()).isEnum();
+                        }
+                        if (endpointModel.endpointMediaType().equals("application/json") && (parameterModel.tsType().toString().equals("string") || isEnum)) {
+                            // strings (and enums, the wire format of an enum is a string) have to be wrapped in quotes in order to be valid json
+                            dataArgument = "`\"${" + parameterModel.getParameterName() + "}\"`";
+                        }
                     }
                 }
+                writer.writeLine("requiredHeaders: [" + Joiner.on(", ").join(requiredHeaders) + "],");
+                writer.writeLine("pathArguments: [" + Joiner.on(", ").join(pathArguments) + "],");
+                writer.writeLine("queryArguments: {");
+                writer.increaseIndent();
+                for (String queryArgument: queryArguments) {
+                    writer.writeLine(queryArgument + ": " + queryArgument + ",");
+                }
+                writer.decreaseIndent();
+                writer.writeLine("},");
+                writer.writeLine("data: " + dataArgument);
+                writer.decreaseIndent();
+                writer.writeLine("};");
+                writer.writeLine("return this.httpApiBridge.callEndpoint<" + endpointModel.tsReturnType().toString() + ">(httpCallData);");
+                writer.decreaseIndent();
+                writer.writeLine("}");
             }
-            writer.writeLine("requiredHeaders: [" + Joiner.on(", ").join(requiredHeaders) + "],");
-            writer.writeLine("pathArguments: [" + Joiner.on(", ").join(pathArguments) + "],");
-            writer.writeLine("queryArguments: {");
-            writer.increaseIndent();
-            for (String queryArgument: queryArguments) {
-                writer.writeLine(queryArgument + ": " + queryArgument + ",");
-            }
-            writer.decreaseIndent();
-            writer.writeLine("},");
-            writer.writeLine("data: " + dataArgument);
-            writer.decreaseIndent();
-            writer.writeLine("};");
-            writer.writeLine("return this.httpApiBridge.callEndpoint<" + endpointModel.tsReturnType().toString() + ">(httpCallData);");
-            writer.decreaseIndent();
-            writer.writeLine("}");
         }
         writer.decreaseIndent();
         writer.writeLine("}");
@@ -171,13 +178,23 @@ public final class ServiceEmitter {
         writer.writeLine("export interface " + settings.getSettings().addTypeNamePrefix + model.name() + " {");
         writer.increaseIndent();
 
-        for (ServiceEndpointModel endpointModel: model.endpointModels()) {
-            if (!endpointsToWarnAboutDuplicateNames.contains(endpointModel.endpointName())) {
-                String line = endpointModel.endpointName() + "(";
-                line += getEndpointParametersString(endpointModel);
-                line += String.format("): " + settings.genericEndpointReturnType(), endpointModel.tsReturnType().toString()) + ";";
-                writer.writeLine(line);
+        for (InnerServiceModel innerServiceModel : model.innerServiceModels()) {
+            if (model.innerServiceModels().size() > 1) {
+                writer.writeLine("");
+                writer.writeLine("// endpoints for service class: " + innerServiceModel.name());
             }
+
+            for (ServiceEndpointModel endpointModel: innerServiceModel.endpointModels()) {
+                if (!endpointsToWarnAboutDuplicateNames.contains(endpointModel.endpointName())) {
+                    String line = endpointModel.endpointName() + "(";
+                    line += getEndpointParametersString(endpointModel);
+                    line += String.format("): " + settings.genericEndpointReturnType(), endpointModel.tsReturnType().toString()) + ";";
+                    writer.writeLine(line);
+                }
+            }
+        }
+        if (!endpointsToWarnAboutDuplicateNames.isEmpty()) {
+            writer.writeLine("");
         }
         for (String endpointName : endpointsToWarnAboutDuplicateNames) {
             writer.writeLine(String.format("// WARNING: not creating method declaration, java service has multiple methods with the name %s", endpointName));
@@ -190,7 +207,7 @@ public final class ServiceEmitter {
     private Set<String> getDuplicateEndpointNames() {
         Set<String> seenEndpointNames = Sets.newHashSet();
         Set<String> duplicateEndpointNames = Sets.newHashSet();
-        model.endpointModels().stream().forEach(model -> {
+        model.innerServiceModels().stream().flatMap(innerServiceModel -> innerServiceModel.endpointModels().stream()).forEach(model -> {
             String endpointName = model.endpointName();
             if (seenEndpointNames.contains(endpointName)) {
                 duplicateEndpointNames.add(endpointName);
@@ -200,7 +217,7 @@ public final class ServiceEmitter {
         return duplicateEndpointNames;
     }
 
-    private String getEndpointPathString(ServiceModel model, ServiceEndpointModel endpointModel) {
+    private String getEndpointPathString(InnerServiceModel model, ServiceEndpointModel endpointModel) {
         String endpointPath = model.servicePath() + "/" + endpointModel.endpointPath();
         return PathUtils.trimSlashes(endpointPath);
     }
