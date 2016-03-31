@@ -76,7 +76,11 @@ public final class ServiceEmitter {
         ByteArrayOutputStream typeDeclarations = new ByteArrayOutputStream();
         Type[] types = new Type[referencedClasses.size()];
         referencedClasses.toArray(types);
-        typescriptGenerator.generateEmbeddableTypeScript(Input.from(types), Output.to(typeDeclarations), true, 1);
+        int intendationLevel = 1;
+        if (!settings.typescriptModule().isPresent()) {
+        	intendationLevel = 0;
+        }
+        typescriptGenerator.generateEmbeddableTypeScript(Input.from(types), Output.to(typeDeclarations), true, intendationLevel);
         writer.write(new String(typeDeclarations.toByteArray()));
     }
 
