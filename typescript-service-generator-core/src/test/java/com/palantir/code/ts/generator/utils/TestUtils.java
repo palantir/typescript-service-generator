@@ -62,6 +62,10 @@ public class TestUtils {
         @GET
         @Path("/enumGetter")
         MyEnum enumGetter();
+
+        @GET
+        @Path("/enumPost")
+        void enumPost(MyEnum dataParam);
     }
 
     @Path("/duplicateMethods")
