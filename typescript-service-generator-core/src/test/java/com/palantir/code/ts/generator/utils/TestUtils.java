@@ -5,12 +5,15 @@
 package com.palantir.code.ts.generator.utils;
 
 import javax.annotation.CheckForNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 import org.immutables.value.Value;
 
@@ -41,6 +44,7 @@ public class TestUtils {
 
         @POST
         @Path("/allOptionsPost/{a}")
+        @Consumes(MediaType.APPLICATION_JSON)
         GenericObject<MyObject> allOptionsPost(@PathParam("a") String a, @QueryParam("b") Integer x, DataObject dataObject);
     }
 
@@ -95,6 +99,16 @@ public class TestUtils {
         public String noPathGetter() {
             return "";
         };
+    }
+
+    @Path("/plainTextService")
+    public interface PlainTextService {
+
+        @GET
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        @Path("/plainText")
+        public String plainText(String dataBody);
     }
 
     public enum MyEnum {

@@ -22,6 +22,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
@@ -125,7 +126,18 @@ public final class ServiceClassParser {
                 if (consumes.value().length > 1) {
                     throw new IllegalArgumentException("Don't know how to handle an endpoint with multiple consume types");
                 }
-                ret.endpointMediaType(consumes.value()[0]);
+                if (consumes.value().length == 1) {
+                    ret.endpointRequestMediaType(consumes.value()[0]);
+                }
+            }
+            Produces produces = endpoint.getAnnotation(Produces.class);
+            if (produces != null) {
+                if (produces.value().length > 1) {
+                    throw new IllegalArgumentException("Don't know how to handle an endpoint with multiple produce types");
+                }
+                if (produces.value().length == 1) {
+                    ret.endpointResponseMediaType(produces.value()[0]);
+                }
             }
 
             List<Map<Class<?>, Annotation>> annotationList = getParamterAnnotationMaps(endpoint);

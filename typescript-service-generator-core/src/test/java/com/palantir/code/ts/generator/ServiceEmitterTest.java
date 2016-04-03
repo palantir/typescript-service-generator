@@ -107,7 +107,8 @@ public class ServiceEmitterTest {
 "            endpointPath: \"testComplexService/allOptionsPost/{a}\",\n" +
 "            endpointName: \"allOptionsPost\",\n" +
 "            method: \"POST\",\n" +
-"            mediaType: \"application/json\",\n" +
+"            requestMediaType: \"application/json\",\n" +
+"            responseMediaType: \"\",\n" +
 "            requiredHeaders: [],\n" +
 "            pathArguments: [a],\n" +
 "            queryArguments: {\n" +
@@ -124,7 +125,8 @@ public class ServiceEmitterTest {
 "            endpointPath: \"testComplexService/queryGetter\",\n" +
 "            endpointName: \"queryGetter\",\n" +
 "            method: \"GET\",\n" +
-"            mediaType: \"application/json\",\n" +
+"            requestMediaType: \"application/json\",\n" +
+"            responseMediaType: \"\",\n" +
 "            requiredHeaders: [],\n" +
 "            pathArguments: [],\n" +
 "            queryArguments: {\n" +
@@ -141,7 +143,8 @@ public class ServiceEmitterTest {
 "            endpointPath: \"testComplexService/simplePut\",\n" +
 "            endpointName: \"simplePut\",\n" +
 "            method: \"PUT\",\n" +
-"            mediaType: \"application/json\",\n" +
+"            requestMediaType: \"application/json\",\n" +
+"            responseMediaType: \"\",\n" +
 "            requiredHeaders: [],\n" +
 "            pathArguments: [],\n" +
 "            queryArguments: {\n" +
@@ -205,7 +208,8 @@ public class ServiceEmitterTest {
 "            endpointPath: \"concreteObject\",\n" +
 "            endpointName: \"noPathGetter\",\n" +
 "            method: \"GET\",\n" +
-"            mediaType: \"application/json\",\n" +
+"            requestMediaType: \"application/json\",\n" +
+"            responseMediaType: \"\",\n" +
 "            requiredHeaders: [],\n" +
 "            pathArguments: [],\n" +
 "            queryArguments: {\n" +
