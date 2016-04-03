@@ -87,6 +87,10 @@ IHttpApiBridge
 -----
 This is an interface that serves as a "bridge" between the generated typescript service classes. The contract of this interface is that it should know how to issue http calls given the inputs, and returns an object of a configurable type (see TypescriptServiceGeneratorConfiguration.genericEndpointReturnType). Any generated service class can be instantiated by constructing it with an implementation of the httpApiBridge. For an example, see the end of output/angularHttpApiBridge.ts
 
+Assumptions
+-----
+The typescript-service-generator generates 1.8.x+ typescript code. This restriction is inherited from one of its dependencies, [typescript-generator](https://github.com/vojtechhabarta/typescript-generator).
+
 Contributing
 -----
 - Write your code
@@ -94,3 +98,20 @@ Contributing
 - Fill out the [Individual](https://github.com/palantir/typescript-service-generator/blob/master/Palantir_Individual_Contributor_License_Agreement.pdf?raw=true) or [Corporate](https://github.com/palantir/typescript-service-generator/blob/master/Palantir_Corporate_Contributor_License_Agreement.pdf?raw=true) Contributor License Agreement and send it to [opensource@palantir.com](mailto:opensource@palantir.com)
   - You can do this easily on a Mac by using the Tools - Annotate - Signature feature in Preview.
 - Submit a pull request
+
+Depending on Published Artifacts
+-----
+typescript-service-generator is hosted on [bintray](https://bintray.com/palantir/releases/typescript-service-generator/view). To include in a gradle project:
+
+Add bintray to your repository list:
+
+```
+repositories { maven { url 'https://dl.bintray.com/palantir/releases/' } }
+```
+
+Add the typescript-service-generator-core dependency to projects:
+
+```
+dependencies { compile "com.palantir.ts:typescript-service-generator-core:x.x.x" }
+```
+
