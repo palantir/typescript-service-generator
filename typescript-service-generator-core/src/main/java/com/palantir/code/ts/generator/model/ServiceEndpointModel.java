@@ -7,10 +7,13 @@ package com.palantir.code.ts.generator.model;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Optional;
 import com.palantir.code.ts.generator.ImmutableTypescriptServiceGeneratorConfiguration;
 
 import cz.habarta.typescript.generator.TsType;
@@ -26,10 +29,13 @@ public abstract class ServiceEndpointModel implements Comparable<ServiceEndpoint
     public abstract String endpointName();
     public abstract String endpointPath();
     public abstract String endpointMethodType();
+
     @Value.Default
-    public String endpointMediaType() {
-        return "application/json";
+    public String endpointRequestMediaType() {
+        return MediaType.APPLICATION_JSON;
     }
+
+    public abstract Optional<String> endpointResponseMediaType();
 
     @Override
     public int compareTo(ServiceEndpointModel o) {

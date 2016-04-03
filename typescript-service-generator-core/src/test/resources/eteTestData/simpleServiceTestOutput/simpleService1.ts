@@ -19,7 +19,8 @@ export class SimpleService1Impl implements SimpleService1 {
             endpointPath: "simple1/method1",
             endpointName: "method1",
             method: "GET",
-            mediaType: "application/json",
+            requestMediaType: "application/json",
+            responseMediaType: "",
             requiredHeaders: [],
             pathArguments: [],
             queryArguments: {

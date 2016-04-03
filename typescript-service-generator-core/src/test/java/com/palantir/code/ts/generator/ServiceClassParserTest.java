@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.CheckForNull;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +41,7 @@ import com.palantir.code.ts.generator.utils.TestUtils.GenericObject;
 import com.palantir.code.ts.generator.utils.TestUtils.IgnoredParametersClass;
 import com.palantir.code.ts.generator.utils.TestUtils.ImmutablesObject;
 import com.palantir.code.ts.generator.utils.TestUtils.MyObject;
+import com.palantir.code.ts.generator.utils.TestUtils.PlainTextService;
 import com.palantir.code.ts.generator.utils.TestUtils.SimpleService1;
 import com.palantir.code.ts.generator.utils.TestUtils.SimpleService2;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
@@ -112,6 +114,7 @@ public class ServiceClassParserTest {
                                                                  .endpointName("allOptionsPost")
                                                                  .endpointPath("allOptionsPost/{a}")
                                                                  .endpointMethodType("POST")
+                                                                 .endpointRequestMediaType(MediaType.APPLICATION_JSON)
                                                                  .build());
         }
         {
@@ -247,6 +250,40 @@ public class ServiceClassParserTest {
         ServiceModel expectedServiceModel = ImmutableServiceModel.builder()
                                                          .addInnerServiceModels(innerService1, innerService2)
                                                          .name("SimpleService1")
+                                                         .addReferencedTypes(String.class)
+                                                         .build();
+
+        assertEquals(expectedServiceModel, model);
+    }
+
+    @Test
+    public void plainTextTest() {
+        ServiceModel model = serviceClassParser.parseServiceClass(PlainTextService.class, settings);
+
+        ImmutableServiceEndpointParameterModel expectedParameterModel = ImmutableServiceEndpointParameterModel.builder()
+                                                                                                              .javaType(String.class)
+                                                                                                              .tsType(TsType.String)
+                                                                                                              .build();
+
+        ImmutableServiceEndpointModel expectedEndpointModel = ImmutableServiceEndpointModel.builder()
+                                                                                           .javaReturnType(String.class)
+                                                                                           .tsReturnType(TsType.String)
+                                                                                           .addParameters(expectedParameterModel)
+                                                                                           .endpointName("plainText")
+                                                                                           .endpointPath("plainText")
+                                                                                           .endpointMethodType("GET")
+                                                                                           .endpointRequestMediaType(MediaType.TEXT_PLAIN)
+                                                                                           .endpointResponseMediaType(MediaType.TEXT_PLAIN)
+                                                                                           .build();
+        InnerServiceModel innerServiceModel = ImmutableInnerServiceModel.builder()
+                                                                        .addEndpointModels(expectedEndpointModel)
+                                                                        .servicePath("plainTextService")
+                                                                        .name("PlainTextService")
+                                                                        .build();
+
+        ServiceModel expectedServiceModel = ImmutableServiceModel.builder()
+                                                         .addInnerServiceModels(innerServiceModel)
+                                                         .name("PlainTextService")
                                                          .addReferencedTypes(String.class)
                                                          .build();
 

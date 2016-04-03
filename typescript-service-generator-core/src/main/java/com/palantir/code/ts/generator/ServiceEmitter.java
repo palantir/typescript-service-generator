@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.core.MediaType;
+
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -20,6 +22,7 @@ import org.codehaus.jackson.map.ser.BeanSerializerFactory;
 import org.codehaus.jackson.type.JavaType;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.palantir.code.ts.generator.model.InnerServiceModel;
@@ -124,7 +127,8 @@ public final class ServiceEmitter {
                 writer.writeLine("endpointPath: \"" + getEndpointPathString(innerServiceModel, endpointModel) + "\",");
                 writer.writeLine("endpointName: \"" + endpointModel.endpointName() + "\",");
                 writer.writeLine("method: \"" + endpointModel.endpointMethodType() + "\",");
-                writer.writeLine("mediaType: \"" + endpointModel.endpointMediaType() + "\",");
+                writer.writeLine("requestMediaType: \"" + endpointModel.endpointRequestMediaType() + "\",");
+                writer.writeLine("responseMediaType: \"" + optionalToString(endpointModel.endpointResponseMediaType()) + "\",");
                 List<String> requiredHeaders = Lists.newArrayList();
                 List<String> pathArguments = Lists.newArrayList();
                 List<String> queryArguments = Lists.newArrayList();
@@ -145,7 +149,7 @@ public final class ServiceEmitter {
                         if (parameterModel.javaType() instanceof Class<?>) {
                             isEnum = ((Class<?>) parameterModel.javaType()).isEnum();
                         }
-                        if (endpointModel.endpointMediaType().equals("application/json") && (parameterModel.tsType().toString().equals("string") || isEnum)) {
+                        if (endpointModel.equals(MediaType.APPLICATION_JSON) && (parameterModel.tsType().toString().equals("string") || isEnum)) {
                             // strings (and enums, the wire format of an enum is a string) have to be wrapped in quotes in order to be valid json
                             dataArgument = "`\"${" + parameterModel.getParameterName() + "}\"`";
                         }
@@ -313,4 +317,12 @@ public final class ServiceEmitter {
         }
         return ret;
     }
+
+    private static <T> String optionalToString(Optional<T> payload) {
+        if (payload.isPresent()) {
+            return payload.get().toString();
+        }
+        return "";
+    }
+
 }

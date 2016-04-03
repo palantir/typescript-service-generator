@@ -37,7 +37,8 @@ module ModuleName.TestComplexServiceClass {
                 endpointPath: "testComplexService/allOptionsPost/{a}",
                 endpointName: "allOptionsPost",
                 method: "POST",
-                mediaType: "application/json",
+                requestMediaType: "application/json",
+                responseMediaType: "",
                 requiredHeaders: [],
                 pathArguments: [a],
                 queryArguments: {
@@ -54,7 +55,8 @@ module ModuleName.TestComplexServiceClass {
                 endpointPath: "testComplexService/queryGetter",
                 endpointName: "queryGetter",
                 method: "GET",
-                mediaType: "application/json",
+                requestMediaType: "application/json",
+                responseMediaType: "",
                 requiredHeaders: [],
                 pathArguments: [],
                 queryArguments: {
@@ -71,7 +73,8 @@ module ModuleName.TestComplexServiceClass {
                 endpointPath: "testComplexService/simplePut",
                 endpointName: "simplePut",
                 method: "PUT",
-                mediaType: "application/json",
+                requestMediaType: "application/json",
+                responseMediaType: "",
                 requiredHeaders: [],
                 pathArguments: [],
                 queryArguments: {

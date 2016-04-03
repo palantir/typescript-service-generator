@@ -3,7 +3,8 @@ export interface %sHttpEndpointOptions {
     endpointPath: string;
     endpointName: string;
     method: string;
-    mediaType: string;
+    requestMediaType: string;
+    responseMediaType: string;
     requiredHeaders: string[];
     pathArguments: any[];
     queryArguments: any;
