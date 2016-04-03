@@ -5,6 +5,7 @@
 package com.palantir.code.ts.generator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -249,6 +250,16 @@ public class ServiceEmitterTest {
 "        VALUE2: <MyEnum>\"VALUE2\",\n" +
 "    }\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
+    }
+
+    @Test
+    public void testEnumDataParameter() {
+        ServiceModel model = serviceClassParser.parseServiceClass(EnumClass.class, settings);
+        ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
+        serviceEmitter.emitTypescriptClass();
+        writer.close();
+        String expectedToContain = "data: `\"${myEnum}\"`";
+        assertTrue(new String(stream.toByteArray()).contains(expectedToContain));
     }
 
     @Test

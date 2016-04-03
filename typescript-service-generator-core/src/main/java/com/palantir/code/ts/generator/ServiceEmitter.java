@@ -149,7 +149,7 @@ public final class ServiceEmitter {
                         if (parameterModel.javaType() instanceof Class<?>) {
                             isEnum = ((Class<?>) parameterModel.javaType()).isEnum();
                         }
-                        if (endpointModel.equals(MediaType.APPLICATION_JSON) && (parameterModel.tsType().toString().equals("string") || isEnum)) {
+                        if (endpointModel.endpointRequestMediaType().equals(MediaType.APPLICATION_JSON) && (parameterModel.tsType().toString().equals("string") || isEnum)) {
                             // strings (and enums, the wire format of an enum is a string) have to be wrapped in quotes in order to be valid json
                             dataArgument = "`\"${" + parameterModel.getParameterName() + "}\"`";
                         }
