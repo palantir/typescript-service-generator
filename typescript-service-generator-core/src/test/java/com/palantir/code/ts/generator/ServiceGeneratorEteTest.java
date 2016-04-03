@@ -17,6 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.palantir.code.ts.generator.utils.TestUtils.SimpleService1;
 import com.palantir.code.ts.generator.utils.TestUtils.TestComplexServiceClass;
 
 public class ServiceGeneratorEteTest {
@@ -25,7 +26,7 @@ public class ServiceGeneratorEteTest {
     public TemporaryFolder outputFolder = new TemporaryFolder();
 
     @Test
-    public void test() throws URISyntaxException, IOException {
+    public void complexServiceTest() throws URISyntaxException, IOException {
         File actualDirectory = outputFolder.getRoot();
         ImmutableTypescriptServiceGeneratorConfiguration config = ImmutableTypescriptServiceGeneratorConfiguration.builder()
                                                                                                                   .copyrightHeader("// Copyright")
@@ -39,6 +40,23 @@ public class ServiceGeneratorEteTest {
         serviceGenerator.generateTypescriptService(TestComplexServiceClass.class);
 
         File expectedDirectory = new File(this.getClass().getResource("/eteTestData/complexServiceTestOutput/").toURI());
+        assertDirectoriesEqual(expectedDirectory, actualDirectory);
+    }
+
+    @Test
+    public void simpleServiceTest() throws URISyntaxException, IOException {
+        File actualDirectory = outputFolder.getRoot();
+        ImmutableTypescriptServiceGeneratorConfiguration config = ImmutableTypescriptServiceGeneratorConfiguration.builder()
+                                                                                                                  .copyrightHeader("// Copyright")
+                                                                                                                  .generatedMessage("// Generated")
+                                                                                                                  .generatedFolderLocation(actualDirectory)
+                                                                                                                  .genericEndpointReturnType("FooReturn<%s>")
+                                                                                                                  .emitES6(true)
+                                                                                                                  .build();
+        ServiceGenerator serviceGenerator = new ServiceGenerator(config);
+        serviceGenerator.generateTypescriptService(SimpleService1.class);
+
+        File expectedDirectory = new File(this.getClass().getResource("/eteTestData/simpleServiceTestOutput/").toURI());
         assertDirectoriesEqual(expectedDirectory, actualDirectory);
     }
 
