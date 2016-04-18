@@ -36,8 +36,8 @@ import cz.habarta.typescript.generator.Output;
 import cz.habarta.typescript.generator.Settings;
 import cz.habarta.typescript.generator.TypeProcessor;
 import cz.habarta.typescript.generator.TypeProcessor.Context;
-import cz.habarta.typescript.generator.TypeProcessor.Result;
 import cz.habarta.typescript.generator.TypeScriptGenerator;
+import cz.habarta.typescript.generator.compiler.SymbolTable;
 
 public final class ServiceEmitter {
 
@@ -285,27 +285,15 @@ public final class ServiceEmitter {
                 continue;
             }
 
-            // dummy context used for below check
-            Context nullContext = new Context() {
-
-                @Override
-                public Result processType(Type javaType) {
-                    return null;
-                }
-
-                @Override
-                public String getMappedName(Class<?> cls) {
-                    return null;
-                }
-            };
-
             if (t instanceof Class && ((Class<?>) t).isEnum()) {
                 ret.add((Class<?>) t);
                 continue;
             }
 
+            // dummy context used for below check
+            Context nullContext = new Context(new SymbolTable(settings.getSettings()), settings.customTypeProcessor());
             // Don't add any classes that the user has made an exception for
-            if (settings.customTypeProcessor() == null || settings.customTypeProcessor().processType(t, nullContext) == null) {
+            if (settings.customTypeProcessor().processType(t, nullContext) == null) {
                 if (t instanceof Class) {
                     ret.add((Class<?>) t);
                 } else if(t instanceof ParameterizedType) {

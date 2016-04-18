@@ -50,8 +50,8 @@ import com.palantir.code.ts.generator.utils.TestUtils.TestServiceClass;
 import cz.habarta.typescript.generator.JsonLibrary;
 import cz.habarta.typescript.generator.Settings;
 import cz.habarta.typescript.generator.TsType;
-import cz.habarta.typescript.generator.TsType.StructuralType;
 import cz.habarta.typescript.generator.TypeScriptOutputKind;
+import cz.habarta.typescript.generator.compiler.Symbol;
 
 public class ServiceClassParserTest {
 
@@ -107,9 +107,9 @@ public class ServiceClassParserTest {
         {
             ServiceEndpointParameterModel aParam = ImmutableServiceEndpointParameterModel.builder().pathParam("a").javaType(String.class).tsType(TsType.String).build();
             ServiceEndpointParameterModel bParam = ImmutableServiceEndpointParameterModel.builder().queryParam("b").javaType(Integer.class).tsType(TsType.Number).build();
-            ServiceEndpointParameterModel dataParam = ImmutableServiceEndpointParameterModel.builder().javaType(DataObject.class).tsType(new TsType.StructuralType("DataObject")).build();
+            ServiceEndpointParameterModel dataParam = ImmutableServiceEndpointParameterModel.builder().javaType(DataObject.class).tsType(new TsType.ReferenceType(new Symbol("DataObject"))).build();
             endpoints.add(ImmutableServiceEndpointModel.builder().javaReturnType(genericReturnType)
-                                                                 .tsReturnType(new StructuralType("GenericObject<MyObject>"))
+                                                                 .tsReturnType(new TsType.ReferenceType(new Symbol("GenericObject<MyObject>")))
                                                                  .parameters(Lists.newArrayList(aParam, dataParam, bParam))
                                                                  .endpointName("allOptionsPost")
                                                                  .endpointPath("allOptionsPost/{a}")
@@ -120,7 +120,7 @@ public class ServiceClassParserTest {
         {
             ServiceEndpointParameterModel xParam = ImmutableServiceEndpointParameterModel.builder().queryParam("x").javaType(Boolean.class).tsType(TsType.Boolean).build();
             endpoints.add(ImmutableServiceEndpointModel.builder().javaReturnType(MyObject.class)
-                                                                 .tsReturnType(new TsType.StructuralType("MyObject"))
+                                                                 .tsReturnType(new TsType.ReferenceType(new Symbol("MyObject")))
                                                                  .parameters(Lists.newArrayList(xParam))
                                                                  .endpointName("queryGetter")
                                                                  .endpointPath("queryGetter")
@@ -128,9 +128,9 @@ public class ServiceClassParserTest {
                                                                  .build());
         }
         {
-            ServiceEndpointParameterModel dataParam = ImmutableServiceEndpointParameterModel.builder().javaType(DataObject.class).tsType(new TsType.StructuralType("DataObject")).build();
+            ServiceEndpointParameterModel dataParam = ImmutableServiceEndpointParameterModel.builder().javaType(DataObject.class).tsType(new TsType.ReferenceType(new Symbol("DataObject"))).build();
             endpoints.add(ImmutableServiceEndpointModel.builder().javaReturnType(ImmutablesObject.class)
-                                                                 .tsReturnType(new TsType.StructuralType("ImmutablesObject"))
+                                                                 .tsReturnType(new TsType.ReferenceType(new Symbol("ImmutablesObject")))
                                                                  .parameters(Lists.newArrayList(dataParam))
                                                                  .endpointName("simplePut")
                                                                  .endpointPath("simplePut")

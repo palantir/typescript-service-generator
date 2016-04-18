@@ -43,9 +43,9 @@ import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ServiceModel;
 import com.palantir.code.ts.generator.utils.PathUtils;
 
-import cz.habarta.typescript.generator.ModelCompiler;
 import cz.habarta.typescript.generator.TsType;
 import cz.habarta.typescript.generator.TypeScriptGenerator;
+import cz.habarta.typescript.generator.compiler.ModelCompiler;
 
 
 public final class ServiceClassParser {
@@ -113,7 +113,7 @@ public final class ServiceClassParser {
             ImmutableServiceEndpointModel.Builder ret = ImmutableServiceEndpointModel.builder();
             ret.endpointName(endpointNameGetter.get(endpoint));
             ret.javaReturnType(endpoint.getGenericReturnType());
-            ret.tsReturnType(compiler.typeFromJavaWithReplacement(endpoint.getGenericReturnType()));
+            ret.tsReturnType(compiler.javaToTypeScript(endpoint.getGenericReturnType()));
             ret.endpointMethodType(getMethodType(endpoint));
 
             String annotationValue = "";
@@ -168,7 +168,7 @@ public final class ServiceClassParser {
                 }
 
                 parameterModel.javaType(javaParameterType);
-                TsType tsType = compiler.typeFromJavaWithReplacement(javaParameterType);
+                TsType tsType = compiler.javaToTypeScript(javaParameterType);
                 parameterModel.tsType(tsType);
                 if (tsType instanceof TsType.OptionalType || query != null) {
                     optionalParameters.add(parameterModel.build());
