@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -116,8 +119,9 @@ public abstract class TypescriptServiceGeneratorConfiguration {
      * A list of annotations that will generate fields as optional in the typescript definitions.
      */
     @Value.Default
+    @SuppressWarnings("unchecked")
     public List<Class<? extends Annotation>> optionalAnnotations() {
-        return new ArrayList<>();
+        return Lists.newArrayList(CheckForNull.class, Nullable.class);
     }
 
     /**
