@@ -1,6 +1,6 @@
 // Copyright
 // Generated
-import { HttpEndpointOptions, HttpApiBridge } from "./httpApiBridge.ts";
+import { HttpEndpointOptions, HttpApiBridge } from "./httpApiBridge";
 
 export interface SimpleService1 {
     method1(): FooReturn<string>;
