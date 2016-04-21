@@ -5,6 +5,7 @@
 package com.palantir.code.ts.generator;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -14,6 +15,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 import org.immutables.value.Value;
 
@@ -92,7 +96,7 @@ public abstract class TypescriptServiceGeneratorConfiguration {
     public boolean emitES6() {
     	return false;
     }
-    
+
     /**
      * A Java format string, expected to have exactly one %s where a generic should be placed.
      * Specifies what return types should look like.
@@ -109,6 +113,15 @@ public abstract class TypescriptServiceGeneratorConfiguration {
     @Value.Default
     public Set<Class<?>> ignoredAnnotations() {
         return new HashSet<>();
+    }
+
+    /**
+     * A list of annotations that will generate fields as optional in the typescript definitions.
+     */
+    @Value.Default
+    @SuppressWarnings("unchecked")
+    public List<Class<? extends Annotation>> optionalAnnotations() {
+        return Lists.newArrayList(CheckForNull.class, Nullable.class);
     }
 
     /**
@@ -201,6 +214,7 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.sortDeclarations = true;
         settings.noFileComment = true;
         settings.jsonLibrary = JsonLibrary.jackson2;
+        settings.optionalAnnotations = optionalAnnotations();
         settings.outputKind = TypeScriptOutputKind.global;
         settings.outputFileType = TypeScriptFileType.implementationFile;
         settings.extensions = Lists.newArrayList(new EnumConstantsExtension());
