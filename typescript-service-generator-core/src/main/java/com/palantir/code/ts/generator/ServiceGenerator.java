@@ -72,14 +72,14 @@ public final class ServiceGenerator {
 
         ServiceModel serviceModel = new ServiceClassParser().parseServiceClass(serviceClass, settings, serviceClassesToMerge);
         ServiceEmitter serviceEndpointEmitter = new ServiceEmitter(serviceModel, settings, writer);
-        
+
         if (settings.emitES6()) {
             String generatedInterfacePrefix = settings.generatedInterfacePrefix();
             String endpointOptionsName = generatedInterfacePrefix + "HttpEndpointOptions";
             String apiBridgeName = generatedInterfacePrefix + "HttpApiBridge";
-            writer.writeLine("import { " + endpointOptionsName + ", " + apiBridgeName + " } from \"./httpApiBridge.ts\";");        	
+            writer.writeLine("import { " + endpointOptionsName + ", " + apiBridgeName + " } from \"./httpApiBridge\";");
         }
-        
+
         serviceEndpointEmitter.emitTypescriptTypes(settings, additionalClassesToOutput);
         serviceEndpointEmitter.emitTypescriptInterface();
         serviceEndpointEmitter.emitTypescriptClass();
@@ -96,7 +96,7 @@ public final class ServiceGenerator {
                 moduleName += "." + subModuleName;
             }
             writer.writeLine("module " + moduleName + " {");
-            writer.increaseIndent();    		
+            writer.increaseIndent();
     	}
     }
 
