@@ -115,6 +115,13 @@ public class TestUtils {
         public String plainText(String dataBody);
     }
 
+    public interface NoPathService {
+
+        @GET
+        @Path("foo")
+        public String foo();
+    }
+
     public enum MyEnum {
         VALUE1, VALUE2
     }

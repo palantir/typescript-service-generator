@@ -72,7 +72,7 @@ public final class ServiceClassParser {
         for (Class<?> serviceClass : serviceClazzes) {
             ImmutableInnerServiceModel.Builder innerServiceModel = ImmutableInnerServiceModel.builder();
             Path servicePathAnnotation = serviceClass.getAnnotation(Path.class);
-            innerServiceModel.servicePath(PathUtils.trimSlashes(servicePathAnnotation.value()));
+            innerServiceModel.servicePath(servicePathAnnotation == null ? "" : PathUtils.trimSlashes(servicePathAnnotation.value()));
             innerServiceModel.name(serviceClass.getSimpleName());
 
             Set<Method> serviceMethods = getAllServiceMethods(serviceClass, settings.methodFilter());
