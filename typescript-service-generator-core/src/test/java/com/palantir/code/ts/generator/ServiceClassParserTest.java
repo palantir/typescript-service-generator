@@ -35,6 +35,7 @@ import com.palantir.code.ts.generator.model.InnerServiceModel;
 import com.palantir.code.ts.generator.model.ServiceEndpointModel;
 import com.palantir.code.ts.generator.model.ServiceEndpointParameterModel;
 import com.palantir.code.ts.generator.model.ServiceModel;
+import com.palantir.code.ts.generator.utils.TestUtils;
 import com.palantir.code.ts.generator.utils.TestUtils.DataObject;
 import com.palantir.code.ts.generator.utils.TestUtils.DuplicateMethodNamesService;
 import com.palantir.code.ts.generator.utils.TestUtils.GenericObject;
@@ -290,4 +291,12 @@ public class ServiceClassParserTest {
         assertEquals(expectedServiceModel, model);
     }
 
+    @Test
+    public void noServiceClassPathTest() {
+        ServiceModel model = serviceClassParser.parseServiceClass(TestUtils.NoPathService.class, settings);
+
+        assertEquals(1, model.innerServiceModels().size());
+        assertEquals(1, model.innerServiceModels().get(0).endpointModels().size());
+        assertEquals("", model.innerServiceModels().get(0).servicePath());
+    }
 }
