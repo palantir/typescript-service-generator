@@ -35,7 +35,6 @@ public final class ServiceGenerator {
         }
         beginService(writer, null);
 
-        writer.writeLine("");
         List<String> bridgeFileLines = null;
         try {
             bridgeFileLines = IOUtils.readLines(this.getClass().getClassLoader().getResourceAsStream(bridgeFile));

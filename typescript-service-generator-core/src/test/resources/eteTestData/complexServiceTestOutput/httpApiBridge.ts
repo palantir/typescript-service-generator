@@ -1,7 +1,6 @@
 // Copyright
 // Generated
 module ModuleName {
-
     export interface IHttpEndpointOptions {
         serviceIdentifier?: string;
         endpointPath: string;
