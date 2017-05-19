@@ -1,6 +1,5 @@
 // Copyright
 // Generated
-
 export interface HttpEndpointOptions {
     serviceIdentifier?: string;
     endpointPath: string;
