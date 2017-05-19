@@ -2,6 +2,9 @@
 // Generated
 import { HttpEndpointOptions, HttpApiBridge } from "./httpApiBridge";
 
+
+// Added by 'EnumConstantsExtension' extension
+
 export interface SimpleService1 {
     method1(): FooReturn<string>;
 }

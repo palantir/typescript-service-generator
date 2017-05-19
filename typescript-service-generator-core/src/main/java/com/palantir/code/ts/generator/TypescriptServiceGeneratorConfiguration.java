@@ -213,6 +213,8 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.addTypeNamePrefix = generatedInterfacePrefix();
         settings.sortDeclarations = true;
         settings.noFileComment = true;
+        // behave like 0.9.0; also fixes when subtypes use generics
+        settings.disableTaggedUnions = true;
         settings.jsonLibrary = JsonLibrary.jackson2;
         settings.optionalAnnotations = optionalAnnotations();
         settings.outputKind = TypeScriptOutputKind.global;

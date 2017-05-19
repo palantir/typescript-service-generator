@@ -18,6 +18,9 @@ module ModuleName.TestComplexServiceClass {
         y: IMyObject;
     }
 
+
+    // Added by 'EnumConstantsExtension' extension
+
     export interface ITestComplexServiceClass {
         allOptionsPost(a: string, dataObject: IDataObject, b?: number): FooReturn<IGenericObject<IMyObject>>;
         queryGetter(x?: boolean): FooReturn<IMyObject>;
