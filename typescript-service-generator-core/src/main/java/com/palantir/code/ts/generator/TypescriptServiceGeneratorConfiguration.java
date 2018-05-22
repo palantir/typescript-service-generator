@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,6 +65,13 @@ public abstract class TypescriptServiceGeneratorConfiguration {
             }
         };
     }
+
+    @Value.Default
+    public Map<String, String> customTypeNaming() {
+        return new LinkedHashMap<>();
+    }
+
+    public abstract Optional<String> customTypeNamingFunction();
 
     /**
      * Provides a strategy for resolving duplicate method names
@@ -210,6 +218,10 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         typeProcessors.add(getOverridingTypeParser());
         typeProcessors.add(genericTypeProcessor);
         settings.customTypeProcessor = new TypeProcessor.Chain(typeProcessors);
+        settings.customTypeNaming = customTypeNaming();
+        if (customTypeNamingFunction().isPresent()) {
+            settings.customTypeNamingFunction = customTypeNamingFunction().get();
+        }
         settings.addTypeNamePrefix = generatedInterfacePrefix();
         settings.sortDeclarations = true;
         settings.noFileComment = true;
