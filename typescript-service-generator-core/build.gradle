@@ -1,20 +1,17 @@
-plugins {
-    id "org.inferred.processors" version "1.1.5"
-}
-
-apply from: "$rootDir/gradle/java.gradle"
-apply from: "$rootDir/gradle/publish.gradle"
+apply plugin: 'com.palantir.publish-jar'
 
 dependencies {
-    compile "cz.habarta.typescript-generator:typescript-generator-core:${typescriptGeneratorVersion}"
-    compile "com.google.guava:guava:${guavaVersion}"
-    compile "jakarta.ws.rs:jakarta.ws.rs-api:${jaxRsVersion}"
-    compile "commons-io:commons-io:${commonsIOVersion}"
-    compile "org.apache.commons:commons-lang3:${lang3Version}"
-    compile "com.google.code.findbugs:jsr305:${findbugsAnnotationsVersion}"
+    api "com.google.guava:guava"
+    api "cz.habarta.typescript-generator:typescript-generator-core"
+    api "jakarta.ws.rs:jakarta.ws.rs-api"
+    api "commons-io:commons-io"
+    api "org.apache.commons:commons-lang3"
+    api "com.google.code.findbugs:jsr305"
 
-    processor "org.immutables:value:${immutablesVersion}"
+    annotationProcessor "org.immutables:value"
 
-    testCompile "junit:junit:${junitVersion}"
-    testCompile "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "junit:junit"
+    testImplementation "org.mockito:mockito-core"
+
+    compileOnly 'org.immutables:value::annotations'
 }

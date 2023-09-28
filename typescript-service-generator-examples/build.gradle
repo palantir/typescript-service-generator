@@ -1,11 +1,4 @@
-plugins {
-    id "org.inferred.processors" version "1.1.5"
-}
-
-apply from: "$rootDir/gradle/java.gradle"
-apply from: "$rootDir/gradle/publish.gradle"
-
 dependencies {
-    compile project(":typescript-service-generator-core")
-    processor "org.immutables:value:2.1.8"
+    api project(":typescript-service-generator-core")
+    annotationProcessor "org.immutables:value"
 }
