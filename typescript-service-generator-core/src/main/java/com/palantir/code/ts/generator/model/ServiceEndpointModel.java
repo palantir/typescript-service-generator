@@ -7,7 +7,7 @@ package com.palantir.code.ts.generator.model;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import org.immutables.value.Value;
 

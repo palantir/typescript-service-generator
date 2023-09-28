@@ -8,10 +8,10 @@ apply from: "$rootDir/gradle/publish.gradle"
 dependencies {
     compile "cz.habarta.typescript-generator:typescript-generator-core:${typescriptGeneratorVersion}"
     compile "com.google.guava:guava:${guavaVersion}"
-    compile "javax.ws.rs:javax.ws.rs-api:${jaxRsVersion}"
+    compile "jakarta.ws.rs:jakarta.ws.rs-api:${jaxRsVersion}"
     compile "commons-io:commons-io:${commonsIOVersion}"
     compile "org.apache.commons:commons-lang3:${lang3Version}"
-    compile "com.google.code.findbugs:annotations:${findbugsAnnotationsVersion}"
+    compile "com.google.code.findbugs:jsr305:${findbugsAnnotationsVersion}"
 
     processor "org.immutables:value:${immutablesVersion}"
 
