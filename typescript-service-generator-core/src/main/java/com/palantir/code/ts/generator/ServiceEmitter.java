@@ -291,7 +291,7 @@ public final class ServiceEmitter {
             }
 
             // dummy context used for below check
-            Context nullContext = new Context(new SymbolTable(settings.getSettings()), settings.customTypeProcessor());
+            Context nullContext = new Context(new SymbolTable(settings.getSettings()), settings.customTypeProcessor(), String.class);
             // Don't add any classes that the user has made an exception for
             if (settings.customTypeProcessor().processType(t, nullContext) == null) {
                 if (t instanceof Class) {

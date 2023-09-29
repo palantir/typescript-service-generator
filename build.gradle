@@ -1,25 +1,16 @@
 buildscript {
     repositories {
-        maven {
-            url 'https://artifactory.palantir.build/artifactory/release-jar'
-            metadataSources { mavenPom(); ignoreGradleMetadataRedirection() }
-        }
+        mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+        gradlePluginPortal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
     dependencies {
         classpath 'com.palantir.jakartapackagealignment:jakarta-package-alignment:0.5.0'
-        classpath 'com.palantir.gradle.strictlogsafety:strict-log-safety:0.15.0'
         classpath 'com.palantir.gradle.jdks:gradle-jdks:0.33.0'
         classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.11.0'
-        classpath 'com.palantir.gradle.jdksinternal:gradle-jdks-internal:0.38.0'
-        classpath 'com.palantir.gradle.disable-module-metadata:gradle-disable-module-metadata:0.27.0'
-        classpath 'com.palantir.artifact-recall:gradle-artifact-recall:0.17.0'
-        classpath 'com.palantir.dependency-control:gradle-dependency-control:0.16.0'
         classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.15.0'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:3.0.0'
-        classpath 'com.palantir.gradle.onelogger:onelogger:0.7.0'
-        classpath 'com.palantir.internalpublish:gradle-internal-publish-plugin:5.19.0'
-        classpath 'com.palantir.jakarta-renames:gradle-jakarta-renames:1.19.0'
+        classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.12.0'
         classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.35.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:3.7.0'
         constraints {
@@ -28,12 +19,10 @@ buildscript {
     }
 }
 
-apply plugin: 'com.palantir.disable-module-metadata'
 apply plugin: 'com.palantir.git-version'
 apply plugin: 'com.palantir.consistent-versions'
-apply plugin: 'com.palantir.dependency-control'
-apply plugin: 'com.palantir.jdks.internal.library'
-apply plugin: 'com.palantir.strict-log-safety'
+apply plugin: 'com.palantir.external-publish'
+apply plugin: 'com.palantir.jdks.latest'
 
 version gitVersion()
 
@@ -41,18 +30,13 @@ allprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.palantir.java-format'
     apply plugin: 'org.inferred.processors'
-    apply plugin: 'com.palantir.jakarta-renames'
-    apply plugin: 'com.palantir.onelogger'
-    apply plugin: 'com.palantir.artifact-recall'
     apply plugin: 'com.palantir.jakarta-package-alignment'
 
     version rootProject.version
     group 'com.palantir.ts'
 
     repositories {
-        maven {
-            url 'https://artifactory.palantir.build/artifactory/release-jar'
-        }
+        mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
 

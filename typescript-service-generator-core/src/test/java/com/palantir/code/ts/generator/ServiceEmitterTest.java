@@ -53,6 +53,8 @@ public class ServiceEmitterTest {
         serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList());
         writer.close();
         String expectedOutput = "" +
+"    /* tslint:disable */\n" +
+"    /* eslint-disable */\n" +
 "\n" +
 "    export interface DataObject {\n" +
 "        y: MyObject;\n" +
@@ -68,8 +70,9 @@ public class ServiceEmitterTest {
 "\n" +
 "    export interface MyObject {\n" +
 "        y: MyObject;\n" +
-"    }\n\n\n    // Added by 'EnumConstantsExtension' extension\n" +
+"    }\n" +
 "";
+        String res = new String(stream.toByteArray());
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 
@@ -229,10 +232,13 @@ public class ServiceEmitterTest {
         ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
         serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList(MyObject.class));
         writer.close();
-        String expectedOutput = "\n" +
+        String expectedOutput =
+                "    /* tslint:disable */\n" +
+                        "    /* eslint-disable */\n" +
+"\n" +
 "    export interface MyObject {\n" +
 "        y: MyObject;\n" +
-"    }\n\n\n    // Added by 'EnumConstantsExtension' extension\n";
+"    }\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 
@@ -242,7 +248,10 @@ public class ServiceEmitterTest {
         ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
         serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList());
         writer.close();
-        String expectedOutput = "\n" +
+        String expectedOutput = "" +
+"    /* tslint:disable */\n" +
+"    /* eslint-disable */\n" +
+"\n" +
 "    export type MyEnum = \"VALUE1\" | \"VALUE2\";\n" +
 "\n\n    // Added by 'EnumConstantsExtension' extension\n\n" +
 "    export const MyEnum = {\n" +

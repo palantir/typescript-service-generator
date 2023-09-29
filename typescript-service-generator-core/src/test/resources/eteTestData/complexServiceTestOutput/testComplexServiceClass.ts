@@ -1,6 +1,8 @@
 // Copyright
 // Generated
 module ModuleName.TestComplexServiceClass {
+    /* tslint:disable */
+    /* eslint-disable */
 
     export interface IDataObject {
         y: IMyObject;
@@ -17,9 +19,6 @@ module ModuleName.TestComplexServiceClass {
     export interface IMyObject {
         y: IMyObject;
     }
-
-
-    // Added by 'EnumConstantsExtension' extension
 
     export interface ITestComplexServiceClass {
         allOptionsPost(a: string, dataObject: IDataObject, b?: number): FooReturn<IGenericObject<IMyObject>>;

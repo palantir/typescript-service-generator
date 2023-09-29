@@ -1,5 +1,3 @@
-apply plugin: 'com.palantir.publish-jar'
-
 dependencies {
     api "com.google.guava:guava"
     api "cz.habarta.typescript-generator:typescript-generator-core"
@@ -9,9 +7,15 @@ dependencies {
     api "com.google.code.findbugs:jsr305"
 
     annotationProcessor "org.immutables:value"
+    testAnnotationProcessor "org.immutables:value"
 
     testImplementation "junit:junit"
     testImplementation "org.mockito:mockito-core"
 
     compileOnly 'org.immutables:value::annotations'
+    testCompileOnly 'org.immutables:value::annotations'
+
+    test {
+        jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
+    }
 }
