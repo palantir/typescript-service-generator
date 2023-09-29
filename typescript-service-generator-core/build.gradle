@@ -1,3 +1,5 @@
+apply plugin: 'com.palantir.external-publish-jar'
+
 dependencies {
     api "com.google.guava:guava"
     api "cz.habarta.typescript-generator:typescript-generator-core"
