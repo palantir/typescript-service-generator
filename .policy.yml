@@ -20,7 +20,7 @@ approval_rules:
       allow_contributor: false
     requires:
       count: 1
-      p[Oermissions: ["admin", "maintain"]
+      permissions: ["admin", "maintain"]
 
   - name: two admins have approved
     options:
