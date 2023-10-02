@@ -1,9 +1,8 @@
 // Copyright
 // Generated
 import { HttpEndpointOptions, HttpApiBridge } from "./httpApiBridge";
-
-
-// Added by 'EnumConstantsExtension' extension
+/* tslint:disable */
+/* eslint-disable */
 
 export interface SimpleService1 {
     method1(): FooReturn<string>;

@@ -1,0 +1,11 @@
+com.google.guava:guava = 32.1.2-jre
+cz.habarta.typescript-generator:typescript-generator-core = 2.35.1025
+jakarta.ws.rs:jakarta.ws.rs-api = 3.1.0
+commons-io:commons-io = 2.4
+org.apache.commons:commons-lang3 = 3.4
+com.google.code.findbugs:jsr305 = 3.0.2
+
+junit:junit = 4.12
+org.mockito:mockito-core = 1.10.19
+
+org.immutables:* = 2.9.3

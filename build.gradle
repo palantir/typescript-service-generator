@@ -1,18 +1,53 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+        gradlePluginPortal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
     dependencies {
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPlugin}"
+        classpath 'com.palantir.jakartapackagealignment:jakarta-package-alignment:0.5.0'
+        classpath 'com.palantir.gradle.jdks:gradle-jdks:0.33.0'
+        classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.11.0'
+        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.15.0'
+        classpath 'com.palantir.gradle.gitversion:gradle-git-version:3.0.0'
+        classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.12.0'
+        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.35.0'
+        classpath 'gradle.plugin.org.inferred:gradle-processors:3.7.0'
+        constraints {
+            classpath('org.apache.logging.log4j:log4j-core:2.17.1'){ because 'Avoid vulnerable versions of log4j' }
+        }
     }
 }
 
-plugins {
-    id 'com.palantir.git-version' version '0.4.0'
-}
+apply plugin: 'com.palantir.git-version'
+apply plugin: 'com.palantir.consistent-versions'
+apply plugin: 'com.palantir.external-publish'
+apply plugin: 'com.palantir.jdks.latest'
+
+version gitVersion()
 
 allprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'com.palantir.java-format'
+    apply plugin: 'org.inferred.processors'
+    apply plugin: 'com.palantir.jakarta-package-alignment'
+
+    version rootProject.version
     group 'com.palantir.ts'
-    version gitVersion()
+
+    repositories {
+        mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+    }
+
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ['-Werror']
+    }
+
+    tasks.check.dependsOn javadoc
 }
+
+javaVersions {
+    libraryTarget = 11
+}
+
