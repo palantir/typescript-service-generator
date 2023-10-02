@@ -72,7 +72,6 @@ public class ServiceEmitterTest {
 "        y: MyObject;\n" +
 "    }\n" +
 "";
-        String res = new String(stream.toByteArray());
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }
 
