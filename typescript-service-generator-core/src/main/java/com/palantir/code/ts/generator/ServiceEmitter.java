@@ -12,14 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.BeanSerializer;
+import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
+import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import jakarta.ws.rs.core.MediaType;
-
-import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.ser.BeanSerializer;
-import org.codehaus.jackson.map.ser.BeanSerializerFactory;
-import org.codehaus.jackson.type.JavaType;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -79,12 +78,8 @@ public final class ServiceEmitter {
         ByteArrayOutputStream typeDeclarations = new ByteArrayOutputStream();
         Type[] types = new Type[referencedClasses.size()];
         referencedClasses.toArray(types);
-        int intendationLevel = 1;
-        if (!settings.typescriptModule().isPresent()) {
-        	intendationLevel = 0;
-        }
-        typescriptGenerator.generateEmbeddableTypeScript(Input.from(types), Output.to(typeDeclarations), true, intendationLevel);
-        writer.write(new String(typeDeclarations.toByteArray()));
+        typescriptGenerator.generateTypeScript(Input.from(types), Output.to(typeDeclarations));
+        Arrays.stream(new String(typeDeclarations.toByteArray()).split("\n")).forEach(writer::writeLine);
     }
 
     public void emitTypescriptClass() {
@@ -264,15 +259,14 @@ public final class ServiceEmitter {
 
             // Classes directly passed in to typescript-generator need to be directly serializable, so filter out the ones that serializers
             // exist for.
-            SerializationConfig serializationConfig = OBJECT_MAPPER.getSerializationConfig();
             final JavaType simpleType = OBJECT_MAPPER.constructType(beanClass);
             try {
-                final JsonSerializer<?> jsonSerializer = BeanSerializerFactory.instance.createSerializer(serializationConfig, simpleType, null);
+                final JsonSerializer<?> jsonSerializer = BeanSerializerFactory.instance.createSerializer(new DefaultSerializerProvider.Impl()
+                        .createInstance(OBJECT_MAPPER.getSerializationConfig(), OBJECT_MAPPER.getSerializerFactory()), simpleType);
                 if (jsonSerializer == null || jsonSerializer instanceof BeanSerializer) {
                     typesToUse.add(beanClass);
                 }
             } catch(Exception e) {
-
             }
         }
         return typesToUse;

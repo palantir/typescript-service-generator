@@ -35,15 +35,11 @@ public final class IndentedOutputWriter {
         indent++;
     }
 
-    public void write(String line) {
-        writer.write(line);
-    }
-
     public void writeLine(String line) {
         String indentString = "";
         for (int i = 0; !line.isEmpty() && i < indent; i++) {
             indentString += this.typeSettings.indentString;
         }
-        write(indentString + line + this.typeSettings.newline);
+        writer.write(indentString + line + this.typeSettings.newline);
     }
 }

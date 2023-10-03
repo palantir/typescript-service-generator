@@ -59,6 +59,7 @@ public final class ServiceGenerator {
     }
 
     public void generateTypescriptService(Class<?> serviceClass, List<Type> additionalClassesToOutput, Class<?>... serviceClassesToMerge) {
+        System.out.println("Hello world, generateTypescriptService");
         OutputStream output = null;
         String firstSimpleName = serviceClass.getSimpleName();
         try {

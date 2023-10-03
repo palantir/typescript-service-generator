@@ -1,5 +1,5 @@
 com.google.guava:guava = 32.1.2-jre
-cz.habarta.typescript-generator:typescript-generator-core = 2.35.1025
+cz.habarta.typescript-generator:typescript-generator-core = 3.2.1263
 jakarta.ws.rs:jakarta.ws.rs-api = 3.1.0
 commons-io:commons-io = 2.4
 org.apache.commons:commons-lang3 = 3.4

@@ -50,14 +50,4 @@ public class IndentedOutputWriterTest {
         writer.close();
         assertEquals("foo\n  bar\n\nbaz\n", new String(stream.toByteArray()));
     }
-
-    @Test
-    public void testWrite() {
-        writer.write("fo");
-        writer.write("o\n");
-        writer.increaseIndent();
-        writer.write("bar");
-        writer.close();
-        assertEquals("foo\nbar", new String(stream.toByteArray()));
-    }
 }

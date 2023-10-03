@@ -49,6 +49,7 @@ public class ServiceEmitterTest {
     @Test
     public void testComplexServiceClassEmitTypes() {
         ServiceModel model = serviceClassParser.parseServiceClass(TestComplexServiceClass.class, settings);
+        writer.increaseIndent();
         ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
         serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList());
         writer.close();
@@ -228,6 +229,7 @@ public class ServiceEmitterTest {
     @Test
     public void testAdditionalClassesToOutput() {
         ServiceModel model = serviceClassParser.parseServiceClass(TestServiceClass.class, settings);
+        writer.increaseIndent();
         ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
         serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList(MyObject.class));
         writer.close();
@@ -244,6 +246,7 @@ public class ServiceEmitterTest {
     @Test
     public void testEnumClass() {
         ServiceModel model = serviceClassParser.parseServiceClass(EnumClass.class, settings);
+        writer.increaseIndent();
         ServiceEmitter serviceEmitter = new ServiceEmitter(model, settings, writer);
         serviceEmitter.emitTypescriptTypes(settings, Lists.newArrayList());
         writer.close();
@@ -251,11 +254,9 @@ public class ServiceEmitterTest {
 "    /* tslint:disable */\n" +
 "    /* eslint-disable */\n" +
 "\n" +
-"    export type MyEnum = \"VALUE1\" | \"VALUE2\";\n" +
-"\n\n    // Added by 'EnumConstantsExtension' extension\n\n" +
-"    export const MyEnum = {\n" +
-"        VALUE1: <MyEnum>\"VALUE1\",\n" +
-"        VALUE2: <MyEnum>\"VALUE2\",\n" +
+"    export const enum MyEnum {\n" +
+"        VALUE1 = \"VALUE1\",\n" +
+"        VALUE2 = \"VALUE2\",\n" +
 "    }\n";
         assertEquals(expectedOutput, new String(stream.toByteArray()));
     }

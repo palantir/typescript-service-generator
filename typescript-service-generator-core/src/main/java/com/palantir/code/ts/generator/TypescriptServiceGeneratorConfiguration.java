@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
+import cz.habarta.typescript.generator.*;
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -28,15 +29,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import cz.habarta.typescript.generator.GenericsTypeProcessor;
-import cz.habarta.typescript.generator.JsonLibrary;
-import cz.habarta.typescript.generator.Settings;
-import cz.habarta.typescript.generator.TsType;
-import cz.habarta.typescript.generator.TypeProcessor;
-import cz.habarta.typescript.generator.TypeScriptFileType;
-import cz.habarta.typescript.generator.TypeScriptOutputKind;
-import cz.habarta.typescript.generator.ext.EnumConstantsExtension;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
@@ -212,11 +204,9 @@ public abstract class TypescriptServiceGeneratorConfiguration {
     public Settings getSettings() {
         Settings settings = new Settings();
 
-        TypeProcessor genericTypeProcessor = new GenericsTypeProcessor();
         List<TypeProcessor> typeProcessors = new ArrayList<>();
         typeProcessors.add(customTypeProcessor());
         typeProcessors.add(getOverridingTypeParser());
-        typeProcessors.add(genericTypeProcessor);
         settings.customTypeProcessor = new TypeProcessor.Chain(typeProcessors);
         settings.customTypeNaming = customTypeNaming();
         if (customTypeNamingFunction().isPresent()) {
@@ -229,9 +219,9 @@ public abstract class TypescriptServiceGeneratorConfiguration {
         settings.disableTaggedUnions = true;
         settings.jsonLibrary = JsonLibrary.jackson2;
         settings.optionalAnnotations = optionalAnnotations();
-        settings.outputKind = TypeScriptOutputKind.global;
+        settings.outputKind = TypeScriptOutputKind.module;
         settings.outputFileType = TypeScriptFileType.implementationFile;
-        settings.extensions = Lists.newArrayList(new EnumConstantsExtension());
+        settings.mapEnum = EnumMapping.asEnum;
 
         return settings;
     }
