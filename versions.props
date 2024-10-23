@@ -1,3 +1,4 @@
+com.fasterxml.jackson.core:jackson-databind = 2.18.0
 com.google.guava:guava = 32.1.2-jre
 cz.habarta.typescript-generator:typescript-generator-core = 2.35.1025
 jakarta.ws.rs:jakarta.ws.rs-api = 3.1.0
