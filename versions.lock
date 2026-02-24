@@ -43,6 +43,8 @@ org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10 (1 constraints: 410fca7a)
 
 [Test dependencies]
 junit:junit:4.12 (1 constraints: db04ff30)
-org.hamcrest:hamcrest-core:1.3 (2 constraints: 7910aeb0)
-org.mockito:mockito-core:1.10.19 (1 constraints: 6e059840)
-org.objenesis:objenesis:2.1 (1 constraints: af0a0fbd)
+net.bytebuddy:byte-buddy:1.17.7 (1 constraints: 4a0b4ede)
+net.bytebuddy:byte-buddy-agent:1.17.7 (1 constraints: 4a0b4ede)
+org.hamcrest:hamcrest-core:1.3 (1 constraints: cc05fe3f)
+org.mockito:mockito-core:5.21.0 (1 constraints: 3a05483b)
+org.objenesis:objenesis:3.3 (1 constraints: b20a14bd)
